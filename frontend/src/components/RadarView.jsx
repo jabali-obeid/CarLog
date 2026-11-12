@@ -79,7 +79,8 @@ export default function RadarView({ onSpotFound }) {
 
     try {
       const res = await fetch('/api/radar');
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         const data = await res.json();
         setSpots(Array.isArray(data) && data.length > 0 ? data : getFallbackSpots());
         setLoading(false);
