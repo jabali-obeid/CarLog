@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, Info, Sparkles, Check, Database, Cloud } from 'lucide-react';
-import { isSupabaseConfigured, resetSupabaseClient, getSupabaseConfig } from '../utils/supabaseClient';
+import { isSupabaseConfigured, resetSupabaseClient, getSupabaseConfig, normalizeSupabaseUrl } from '../utils/supabaseClient';
 
 export default function SettingsModal({ isOpen, onClose, onSettingsSaved }) {
   const [apiKey, setApiKey] = useState('');
@@ -24,7 +24,9 @@ export default function SettingsModal({ isOpen, onClose, onSettingsSaved }) {
   const handleSave = () => {
     localStorage.setItem('cardex_gemini_key', apiKey.trim());
     localStorage.setItem('cardex_tripo_key', tripoKey.trim());
-    localStorage.setItem('carlog_supabase_url', supabaseUrl.trim());
+    const cleanSupabaseUrl = normalizeSupabaseUrl(supabaseUrl);
+    setSupabaseUrl(cleanSupabaseUrl);
+    localStorage.setItem('carlog_supabase_url', cleanSupabaseUrl);
     localStorage.setItem('carlog_supabase_key', supabaseKey.trim());
     resetSupabaseClient();
     setSavedSuccess(true);

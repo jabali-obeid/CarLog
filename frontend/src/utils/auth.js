@@ -110,6 +110,7 @@ export async function registerUser({ username, email, password }) {
       email: cleanEmail,
       password,
       options: {
+        emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         data: { username: cleanUser }
       }
     });

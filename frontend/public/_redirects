@@ -1,24 +1,2 @@
-[[redirects]]
-  from = "/api/identify"
-  to = "/.netlify/functions/identify"
-  status = 200
-
-[[redirects]]
-  from = "/api/garage"
-  to = "/.netlify/functions/garage"
-  status = 200
-
-[[redirects]]
-  from = "/api/garage/*"
-  to = "/.netlify/functions/garage"
-  status = 200
-
-[[redirects]]
-  from = "/api/radar"
-  to = "/.netlify/functions/radar"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+/api/identify   /.netlify/functions/identify   200
+/*              /index.html                    200
