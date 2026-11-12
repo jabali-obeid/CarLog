@@ -7,7 +7,6 @@ export function normalizeSupabaseUrl(rawUrl) {
   const trimmed = (rawUrl || '').trim();
   if (!trimmed) return '';
 
-  // Auto-fix if user accidentally pasted the Supabase Dashboard URL
   const dashboardMatch = trimmed.match(/supabase\.com\/dashboard\/project\/([a-z0-9]+)/i);
   if (dashboardMatch?.[1]) {
     return `https://${dashboardMatch[1]}.supabase.co`;
@@ -16,32 +15,29 @@ export function normalizeSupabaseUrl(rawUrl) {
   try {
     const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
     const parsed = new URL(withProtocol);
-    // Strip any accidental extra path like /auth/v1 or /rest/v1
     return parsed.origin;
   } catch {
     return trimmed;
   }
 }
 
-export function getSupabaseConfig() {
+function getEnvConfig() {
   const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
   const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-  const localUrl = localStorage.getItem('carlog_supabase_url') || '';
-  const localKey = localStorage.getItem('carlog_supabase_key') || '';
 
   return {
-    url: normalizeSupabaseUrl(envUrl || localUrl),
-    anonKey: (envKey || localKey).trim()
+    url: normalizeSupabaseUrl(envUrl),
+    anonKey: envKey.trim()
   };
 }
 
 export function isSupabaseConfigured() {
-  const { url, anonKey } = getSupabaseConfig();
+  const { url, anonKey } = getEnvConfig();
   return Boolean(url && anonKey && url.startsWith('http'));
 }
 
 export function getSupabase() {
-  const { url, anonKey } = getSupabaseConfig();
+  const { url, anonKey } = getEnvConfig();
   if (!url || !anonKey || !url.startsWith('http')) {
     return null;
   }
@@ -59,9 +55,4 @@ export function getSupabase() {
   }
 
   return cachedClient;
-}
-
-export function resetSupabaseClient() {
-  cachedClient = null;
-  cachedConfigHash = '';
 }

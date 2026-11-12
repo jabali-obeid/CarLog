@@ -298,3 +298,4 @@ export function evaluateAchievements(garage = []) {
     stats: { totalCars, totalHp, uniqueBrandsCount: uniqueBrands.size }
   };
 }
+
