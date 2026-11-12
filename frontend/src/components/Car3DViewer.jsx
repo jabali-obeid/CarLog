@@ -590,14 +590,43 @@ export default function Car3DViewer({ car, neonColorHex = '#00F0FF' }) {
       setLoading(false);
     }
 
-    // --- Animation Loop ---
-    let animationFrameId;
+    // --- Animation Loop (pauses automatically when minimized/backgrounded) ---
+    let animationFrameId = null;
     const animate = () => {
+      if (document.hidden) {
+        animationFrameId = null;
+        return;
+      }
       animationFrameId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
     };
     animate();
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && animationFrameId === null && isMounted) {
+        animate();
+      } else if (document.hidden && animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const handleContextLost = (e) => {
+      e.preventDefault();
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+    const handleContextRestored = () => {
+      if (isMounted && animationFrameId === null) {
+        animate();
+      }
+    };
+    renderer.domElement.addEventListener('webglcontextlost', handleContextLost, false);
+    renderer.domElement.addEventListener('webglcontextrestored', handleContextRestored, false);
 
     const handleResize = () => {
       if (!container) return;
@@ -611,8 +640,11 @@ export default function Car3DViewer({ car, neonColorHex = '#00F0FF' }) {
 
     return () => {
       isMounted = false;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      renderer.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
+      renderer.domElement.removeEventListener('webglcontextrestored', handleContextRestored, false);
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
 
       // Dispose all Three.js geometries, materials, and textures to free GPU memory
       scene.traverse((obj) => {

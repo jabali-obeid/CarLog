@@ -1,5 +1,5 @@
 // CarLog Service Worker - Offline PWA Cache & Background Push
-const CACHE_NAME = 'carlog-v2.0.1';
+const CACHE_NAME = 'carlog-v2.0.2';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -15,7 +15,6 @@ const PRECACHE_ASSETS = [
   '/icons/icon.svg'
 ];
 
-// Install: Pre-cache app shell
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
@@ -27,7 +26,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: Clean up older cache versions
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -42,7 +40,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Safe helper to ignore CacheStorage quota failures
 function safeCachePut(request, response) {
   if (!response || response.status !== 200 || response.type !== 'basic') return;
   const clone = response.clone();
@@ -51,18 +48,26 @@ function safeCachePut(request, response) {
     .catch(() => {});
 }
 
-// Fetch: Strategy routing
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // Never intercept third-party APIs (Supabase Auth/DB/Storage, Gemini API, CDNs)
-  if (url.origin !== self.location.origin) {
+  // Navigation / index.html: Network-First to prevent stale HTML pointing to deleted JS chunk hashes
+  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          safeCachePut(event.request, response);
+          return response;
+        })
+        .catch(() => caches.match('/index.html').then((r) => r || caches.match(event.request)))
+    );
     return;
   }
 
-  // API calls: Network-First with Cache fallback
+  // API calls: Network-First
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
@@ -75,7 +80,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3D GLB Models (/models/*.glb): Cache-First with safe quota handling
+  // 3D GLB Models: Cache-First
   if (url.pathname.startsWith('/models/')) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
@@ -89,12 +94,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App Shell & Assets: Stale-While-Revalidate
+  // JS/CSS/Static Assets: Cache if valid non-HTML asset, never poison JS cache with HTML fallback
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
-          safeCachePut(event.request, networkResponse);
+          const ct = networkResponse.headers.get('content-type') || '';
+          const isCodeAsset = url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
+          if (!isCodeAsset || !ct.includes('text/html')) {
+            safeCachePut(event.request, networkResponse);
+          }
           return networkResponse;
         })
         .catch(() => cachedResponse);
@@ -104,7 +113,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push Notifications for Radar Spawn Alerts
 self.addEventListener('push', (event) => {
   let data = { title: '🚨 CarLog Radar Alert', body: '¡Un auto raro fue avistado cerca de tu posición!' };
   try {
@@ -122,7 +130,6 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// Click Notification: Open App on Radar tab
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(

@@ -10,14 +10,30 @@ import {
 } from './utils/auth';
 import { getSupabase, isSupabaseConfigured } from './utils/supabaseClient';
 
-const ScannerView = lazy(() => import('./components/ScannerView'));
-const NfsGarageView = lazy(() => import('./components/NfsGarageView'));
-const BrandBookshelf = lazy(() => import('./components/BrandBookshelf'));
-const RadarView = lazy(() => import('./components/RadarView'));
-const SettingsModal = lazy(() => import('./components/SettingsModal'));
-const DesktopGate = lazy(() => import('./components/DesktopGate'));
-const AuthModal = lazy(() => import('./components/AuthModal'));
-const ProfileView = lazy(() => import('./components/ProfileView'));
+function lazyWithRetry(importer) {
+  return lazy(() =>
+    importer().catch(async (err) => {
+      // Retry once after 300ms in case mobile radio/PWA just woke from background
+      await new Promise((r) => setTimeout(r, 300));
+      return importer().catch(() => {
+        if (!sessionStorage.getItem('carlog_chunk_reload')) {
+          sessionStorage.setItem('carlog_chunk_reload', '1');
+          window.location.reload();
+        }
+        throw err;
+      });
+    })
+  );
+}
+
+const ScannerView = lazyWithRetry(() => import('./components/ScannerView'));
+const NfsGarageView = lazyWithRetry(() => import('./components/NfsGarageView'));
+const BrandBookshelf = lazyWithRetry(() => import('./components/BrandBookshelf'));
+const RadarView = lazyWithRetry(() => import('./components/RadarView'));
+const SettingsModal = lazyWithRetry(() => import('./components/SettingsModal'));
+const DesktopGate = lazyWithRetry(() => import('./components/DesktopGate'));
+const AuthModal = lazyWithRetry(() => import('./components/AuthModal'));
+const ProfileView = lazyWithRetry(() => import('./components/ProfileView'));
 
 function ViewFallback() {
   return (
@@ -65,7 +81,9 @@ export default function App() {
             provider: 'supabase'
           };
           localStorage.setItem('carlog_current_session', JSON.stringify(resolved));
-          setCurrentUser(resolved);
+          setCurrentUser((prev) =>
+            prev?.id === resolved.id && prev?.username === resolved.username ? prev : resolved
+          );
         }
       });
       subscription = data?.subscription || null;
