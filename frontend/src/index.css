@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@source not "../android";
+@source not "../dist";
+@source not "../netlify";
+@source not "../public/models";
+
+@layer utilities {
+  /* Holographic Shine & Rarity Effects */
+  .holo-legendary {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 140, 0, 0.15) 50%, rgba(255, 255, 255, 0.3) 100%);
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.45);
+    border-color: #fbbf24;
+  }
+
+  .holo-historic {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.2) 0%, rgba(180, 83, 9, 0.15) 50%, rgba(254, 243, 199, 0.25) 100%);
+    box-shadow: 0 0 25px rgba(217, 119, 6, 0.4);
+    border-color: #d97706;
+  }
+
+  .holo-rare {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(126, 34, 206, 0.15) 50%, rgba(243, 232, 255, 0.25) 100%);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+    border-color: #a855f7;
+  }
+
+  .holo-common {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 50%, rgba(219, 234, 254, 0.2) 100%);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+  }
+
+  .holo-basic {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 50%, rgba(229, 231, 235, 0.15) 100%);
+    box-shadow: 0 0 10px rgba(107, 114, 128, 0.2);
+    border-color: #6b7280;
+  }
+
+  /* Scanline laser animation for car spotting camera */
+  @keyframes scanline {
+    0% { top: 0%; opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { top: 96%; opacity: 0.8; }
+  }
+
+  .animate-scanline {
+    animation: scanline 2.2s ease-in-out infinite alternate;
+  }
+
+  /* Radar sweep animation */
+  @keyframes radar-sweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-radar {
+    animation: radar-sweep 4s linear infinite;
+  }
+
+  /* Pulse Glow */
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: #090a0f;
+  color: #f3f4f6;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f111a;
+}
+::-webkit-scrollbar-thumb {
+  background: #272a38;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b3f54;
+}

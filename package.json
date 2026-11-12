@@ -1,0 +1,12 @@
+{
+  "name": "cardex-root",
+  "version": "1.0.0",
+  "description": "CarDex - Car Spotting & Collecting App (Pokémon de Autos)",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev:backend": "cd backend && node --watch server.js",
+    "dev:frontend": "cd frontend && npm.cmd run dev",
+    "build": "cd frontend && npm.cmd run build"
+  }
+}
+

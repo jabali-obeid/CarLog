@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CarDex</string>
+    <string name="title_activity_main">CarDex</string>
+    <string name="package_name">com.cardex.app</string>
+    <string name="custom_url_scheme">com.cardex.app</string>
+</resources>
