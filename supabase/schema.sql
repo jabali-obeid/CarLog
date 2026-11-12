@@ -137,3 +137,77 @@ create policy "Usuarios autenticados suben fotos a su carpeta"
     and auth.role() = 'authenticated'
   );
 
+-- 5. Control de cuota diaria de escaneos IA (15 escaneos por usuario/día)
+create table if not exists public.daily_scan_usage (
+  user_id uuid references auth.users on delete cascade not null,
+  scan_date date not null default (timezone('utc'::text, now()))::date,
+  scan_count integer not null default 0,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  primary key (user_id, scan_date)
+);
+
+alter table public.daily_scan_usage enable row level security;
+
+create policy "Cada usuario consulta su propio consumo diario"
+  on public.daily_scan_usage for select
+  using ( auth.uid() = user_id );
+
+create or replace function public.consume_daily_scan(max_scans integer default 15)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_today date := (timezone('utc'::text, now()))::date;
+  v_count integer;
+begin
+  if v_uid is null then
+    return jsonb_build_object(
+      'allowed', false,
+      'reason', 'AUTH_REQUIRED',
+      'used', 0,
+      'remaining', 0,
+      'limit', max_scans
+    );
+  end if;
+
+  insert into public.daily_scan_usage (user_id, scan_date, scan_count)
+  values (v_uid, v_today, 0)
+  on conflict (user_id, scan_date) do nothing;
+
+  update public.daily_scan_usage
+  set scan_count = scan_count + 1,
+      updated_at = timezone('utc'::text, now())
+  where user_id = v_uid
+    and scan_date = v_today
+    and scan_count < max_scans
+  returning scan_count into v_count;
+
+  if v_count is null then
+    select scan_count into v_count
+    from public.daily_scan_usage
+    where user_id = v_uid and scan_date = v_today;
+
+    return jsonb_build_object(
+      'allowed', false,
+      'reason', 'LIMIT_REACHED',
+      'used', coalesce(v_count, max_scans),
+      'remaining', 0,
+      'limit', max_scans
+    );
+  end if;
+
+  return jsonb_build_object(
+    'allowed', true,
+    'used', v_count,
+    'remaining', greatest(0, max_scans - v_count),
+    'limit', max_scans
+  );
+end;
+$$;
+
+grant execute on function public.consume_daily_scan(integer) to authenticated;
+
+

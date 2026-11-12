@@ -8,6 +8,8 @@ import { compressImage } from '../utils/imageUtils';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
 import { getCurrentSession } from '../utils/auth';
 
+const DAILY_SCAN_LIMIT = 15;
+
 export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastToRadar, initialPreset }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -15,6 +17,40 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [quotaInfo, setQuotaInfo] = useState(null);
+
+  const hasCustomKey = Boolean((localStorage.getItem('cardex_gemini_key') || '').trim());
+
+  // Load user's remaining daily scan count on mount
+  useEffect(() => {
+    let mounted = true;
+    async function loadQuota() {
+      const supabase = getSupabase();
+      if (!supabase || !isSupabaseConfigured()) return;
+      try {
+        const { data: sess } = await supabase.auth.getSession();
+        const uid = sess?.session?.user?.id;
+        if (!uid) return;
+        const todayUtc = new Date().toISOString().slice(0, 10);
+        const { data } = await supabase
+          .from('daily_scan_usage')
+          .select('scan_count')
+          .eq('user_id', uid)
+          .eq('scan_date', todayUtc)
+          .maybeSingle();
+        if (mounted) {
+          const used = data?.scan_count || 0;
+          setQuotaInfo({
+            used,
+            remaining: Math.max(0, DAILY_SCAN_LIMIT - used),
+            limit: DAILY_SCAN_LIMIT
+          });
+        }
+      } catch {}
+    }
+    loadQuota();
+    return () => { mounted = false; };
+  }, []);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -265,27 +301,48 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         triggerCelebration(presetData.rarity);
       } else {
         let carData = null;
+        const customKey = (localStorage.getItem('cardex_gemini_key') || '').trim();
+        let accessToken = '';
+        const supabase = getSupabase();
+        if (supabase && isSupabaseConfigured()) {
+          const { data: sessData } = await supabase.auth.getSession().catch(() => ({ data: null }));
+          accessToken = sessData?.session?.access_token || '';
+        }
 
         // 1. Try local or configured server endpoint first
+        let serverRespondedJson = false;
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
           const res = await fetch('/api/identify', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
               imageBase64: base64OrUrl,
-              mimeType: 'image/jpeg'
+              mimeType: 'image/jpeg',
+              ...(customKey ? { apiKey: customKey } : {})
             })
           });
 
-          if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            serverRespondedJson = true;
             const json = await res.json();
-            if (json.car) carData = json.car;
+            if (json.quota) setQuotaInfo(json.quota);
+
+            if (res.ok && json.car) {
+              carData = json.car;
+            } else if (res.status === 401 || res.status === 429 || res.status === 400) {
+              throw new Error(json.error || 'No se pudo identificar el vehículo.');
+            }
           }
         } catch (serverErr) {
+          if (serverRespondedJson) throw serverErr;
           console.warn('Backend endpoint unavailable, falling back to direct AI...', serverErr);
         }
 
-        // 2. If running on Netlify Drop static hosting without active backend, call Gemini directly
+        // 2. Fallback to direct Gemini only if server endpoint isn't active and user/env has a key
         if (!carData) {
           carData = await identifyDirectWithGemini(base64OrUrl);
         }
@@ -408,12 +465,30 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         {/* Glow corner */}
         <div className="absolute -top-10 -right-10 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-red-500" />
             <h2 className="text-xl font-bold text-white tracking-tight">Captura y Reconocimiento IA</h2>
           </div>
-          <span className="text-xs text-zinc-400 font-mono">CarLog Vision v2.0</span>
+          <div className="flex items-center gap-2">
+            {hasCustomKey ? (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+                API Propia • Ilimitado
+              </span>
+            ) : quotaInfo ? (
+              <span
+                className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono ${
+                  quotaInfo.remaining <= 3
+                    ? 'bg-red-500/10 border-red-500/30 text-red-300'
+                    : 'bg-zinc-900 border-zinc-700 text-zinc-300'
+                }`}
+              >
+                Escaneos hoy: {quotaInfo.remaining}/{quotaInfo.limit}
+              </span>
+            ) : (
+              <span className="text-xs text-zinc-400 font-mono">15 escaneos/día</span>
+            )}
+          </div>
         </div>
 
         {/* Viewfinder Window */}
