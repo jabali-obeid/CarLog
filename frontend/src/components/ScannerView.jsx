@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, RefreshCw, Sparkles, CheckCircle2, AlertTriangle, Radio } from 'lucide-react';
+import { Camera, Upload, RefreshCw, CheckCircle2, AlertTriangle, Aperture, ScanLine } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CarCard from './CarCard';
 import { sound } from '../utils/audio';
-import { SAMPLE_CARS } from '../utils/demoData';
 import { compressImage } from '../utils/imageUtils';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
 import { getCurrentSession } from '../utils/auth';
@@ -82,7 +81,7 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
       video.playsInline = true;
       video.setAttribute('playsinline', '');
       video.setAttribute('webkit-playsinline', '');
-      
+
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
@@ -96,15 +95,13 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
     setCameraError(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('La cámara en vivo requiere contexto seguro (HTTPS). ¡Usa el botón "Tomar Foto con Cámara HD"!');
+        throw new Error('La cámara en vivo requiere contexto seguro (HTTPS). Usa el botón "Tomar Foto con Cámara HD".');
       }
 
-      // Stop any existing stream first
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
       }
 
-      // Constraints with fallback for desktop integrated cameras and mobile rear cameras
       let stream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -116,7 +113,6 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
           audio: false
         });
       } catch (errFacing) {
-        // Fallback without facingMode for laptops/PCs
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false
@@ -127,7 +123,7 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
       setCameraActive(true);
     } catch (err) {
       console.warn('Camera access denied or unavailable:', err);
-      setCameraError('Permiso denegado o cámara no disponible. Asegurate de habilitar el permiso de cámara.');
+      setCameraError('Permiso denegado o cámara no disponible. Asegúrate de habilitar el permiso de cámara.');
       setCameraActive(false);
     }
   };
@@ -159,7 +155,7 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
       }
       const avg = total / ((sample.length / 4) * 3);
       if (avg < 5) {
-        setCameraError('La cámara tomó una foto completamente oscura/negra. Toca "Cámara Nativa HD" para usar la cámara de tu teléfono con sensor.');
+        setCameraError('La cámara tomó una foto completamente oscura/negra. Toca "Cámara HD" para usar el sensor nativo de tu teléfono.');
         return;
       }
     } catch (e) {}
@@ -197,14 +193,6 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastTo
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleDemoPreset = (preset) => {
-    setCameraError(null);
-    sound.playCameraClick();
-    setImagePreview(preset.image);
-    stopCamera();
-    identifyVehicle(preset.image, preset.data);
   };
 
   // Client-side Direct AI fallback for static Netlify hosting
@@ -292,7 +280,6 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
     setIdentifiedCar(null);
     setCameraError(null);
 
-    // Scanning delay
     await new Promise(r => setTimeout(r, 1000));
 
     try {
@@ -378,7 +365,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
   const handleSave = (car) => {
     onSaveToGarage(car);
-    setToastMessage(`¡${car.brand} ${car.model} guardado en tu Garage! 🏎️`);
+    setToastMessage(`${car.brand} ${car.model} guardado en tu Garage`);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
@@ -421,7 +408,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         });
         if (!error) {
           sound.playRadarPing();
-          setToastMessage(`🚨 ¡Alerta enviada al Radar Cloud para ${car.brand} ${car.model}!`);
+          setToastMessage(`Alerta enviada al Radar Cloud para ${car.brand} ${car.model}`);
           setTimeout(() => setToastMessage(null), 4000);
           return;
         }
@@ -438,7 +425,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       });
       if (res.ok) {
         sound.playRadarPing();
-        setToastMessage(`🚨 ¡Alerta de proximidad lanzada para ${car.brand} ${car.model}!`);
+        setToastMessage(`Alerta de proximidad lanzada para ${car.brand} ${car.model}`);
         setTimeout(() => setToastMessage(null), 4000);
         return;
       }
@@ -451,48 +438,78 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-5 max-w-4xl mx-auto animate-fade-in pb-2">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold text-sm shadow-2xl flex items-center gap-2 border border-emerald-400 animate-bounce">
-          <CheckCircle2 className="w-5 h-5 text-emerald-200" />
-          {toastMessage}
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-[#121620]/95 text-white font-semibold text-xs shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 backdrop-blur-xl animate-fade-in max-w-[90vw]"
+        >
+          <span className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          </span>
+          <span className="truncate">{toastMessage}</span>
         </div>
       )}
 
-      {/* Main Viewfinder / Capture Box */}
-      <div className="relative rounded-3xl bg-[#10121d] border border-white/10 p-5 shadow-2xl overflow-hidden">
-        {/* Glow corner */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Main Optical Viewfinder / Capture Bay */}
+      <div className="relative rounded-3xl cl-card cl-microgrid p-4 sm:p-5 overflow-hidden">
+        {/* Subtle Top Optical Accent */}
+        <div className="absolute -top-12 -right-12 w-44 h-44 bg-red-600/8 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2">
-            <Camera className="w-5 h-5 text-red-500" />
-            <h2 className="text-xl font-bold text-white tracking-tight">Captura y Reconocimiento IA</h2>
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-red-600/12 border border-red-500/30 flex items-center justify-center text-red-400">
+              <Aperture className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <span className="text-[9px] font-telemetry uppercase tracking-widest text-[var(--cl-text-muted)] block leading-none">
+                OPTICAL ID // GEMINI VISION
+              </span>
+              <h2 className="font-display text-2xl font-extrabold text-white uppercase tracking-tight leading-none mt-1">
+                Escáner de Calle
+              </h2>
+            </div>
           </div>
+
           <div className="flex items-center gap-2">
             {hasCustomKey ? (
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
-                API Propia • Ilimitado
+              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-telemetry text-emerald-300 font-semibold uppercase">
+                API Propia · Ilimitado
               </span>
             ) : quotaInfo ? (
               <span
-                className={`px-2.5 py-0.5 rounded-full border text-[11px] font-mono ${
+                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
                   quotaInfo.remaining <= 3
-                    ? 'bg-red-500/10 border-red-500/30 text-red-300'
-                    : 'bg-zinc-900 border-zinc-700 text-zinc-300'
+                    ? 'bg-red-500/12 border-red-500/35 text-red-300'
+                    : 'cl-panel text-zinc-300'
                 }`}
               >
-                Escaneos hoy: {quotaInfo.remaining}/{quotaInfo.limit}
+                Hoy: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
               </span>
             ) : (
-              <span className="text-xs text-zinc-400 font-mono">15 escaneos/día</span>
+              <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-zinc-400 font-telemetry uppercase">
+                15 escaneos/día
+              </span>
             )}
           </div>
         </div>
 
-        {/* Viewfinder Window */}
-        <div className="relative w-full h-80 sm:h-96 rounded-2xl bg-black border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center overflow-hidden">
+        {/* Viewfinder Frame with Corner Brackets */}
+        <div className="relative w-full h-80 sm:h-96 rounded-2xl bg-[#06080c] border border-white/[0.11] flex flex-col items-center justify-center overflow-hidden shadow-inner">
+          {/* Precision Viewfinder Corner Brackets */}
+          <span className="pointer-events-none absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-white/30 z-20" />
+          <span className="pointer-events-none absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-white/30 z-20" />
+          <span className="pointer-events-none absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-white/30 z-20" />
+          <span className="pointer-events-none absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-white/30 z-20" />
+
+          {/* Top Viewfinder HUD Status */}
+          <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-black/65 border border-white/10 backdrop-blur-md flex items-center gap-1.5 text-[9px] font-telemetry text-zinc-300 uppercase tracking-widest">
+            <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-red-500 animate-pulse' : analyzing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+            <span>{cameraActive ? 'VISOR ACTIVO' : analyzing ? 'ANALIZANDO' : 'LISTO PARA CAPTURA'}</span>
+          </div>
+
           {cameraActive ? (
             <>
               <video
@@ -500,99 +517,113 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-full object-cover bg-black"
+                className="w-full h-full object-cover bg-[#06080c]"
                 onLoadedMetadata={(e) => {
                   e.target.play().catch(console.warn);
                 }}
               />
-              {/* Laser Scanline */}
-              <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_#ef4444] animate-scanline pointer-events-none"></div>
+              {/* Optical Laser Scanline */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_12px_rgba(239,68,68,0.85)] animate-scanline pointer-events-none z-10" />
 
               {/* Shutter Button Overlay */}
-              <div className="absolute bottom-6 flex items-center gap-4 z-20">
+              <div className="absolute bottom-5 flex items-center gap-4 z-20">
                 <button
                   onClick={takeSnapshot}
-                  className="w-16 h-16 rounded-full border-4 border-white bg-red-600 hover:bg-red-500 active:scale-95 transition-all shadow-2xl flex items-center justify-center"
+                  aria-label="Capturar foto"
+                  className="w-16 h-16 rounded-full p-1 border-2 border-white/80 bg-black/40 backdrop-blur-md active:scale-95 transition-transform shadow-2xl flex items-center justify-center"
                 >
-                  <Camera className="w-7 h-7 text-white" />
+                  <span className="w-full h-full rounded-full bg-red-600 hover:bg-red-500 transition-colors flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-white" />
+                  </span>
                 </button>
                 <button
                   onClick={stopCamera}
-                  className="px-4 py-2 rounded-xl bg-black/70 hover:bg-black text-xs font-semibold text-zinc-300 backdrop-blur-md"
+                  className="px-4 py-2 rounded-xl bg-black/75 hover:bg-black text-xs font-semibold text-zinc-200 border border-white/15 backdrop-blur-md transition active:scale-95"
                 >
                   Cancelar
                 </button>
               </div>
             </>
           ) : imagePreview ? (
-            <div className="relative w-full h-full flex items-center justify-center bg-black">
+            <div className="relative w-full h-full flex items-center justify-center bg-[#06080c]">
               <img
                 src={imagePreview}
-                alt="Captured Car"
+                alt="Vehículo capturado"
                 className="w-full h-full object-contain"
               />
               {analyzing && (
-                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-20">
-                  <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <h4 className="text-lg font-bold text-white tracking-wide">
-                    Identificando Vehículo con IA...
+                <div className="absolute inset-0 bg-[#06080c]/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-20">
+                  <div className="relative w-14 h-14 flex items-center justify-center mb-4">
+                    <div className="absolute inset-0 rounded-full border-2 border-red-500/25" />
+                    <div className="w-14 h-14 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                    <ScanLine className="w-5 h-5 text-red-400 absolute" />
+                  </div>
+                  <h4 className="font-display text-2xl font-extrabold uppercase text-white tracking-wide">
+                    Identificando Vehículo
                   </h4>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-sm">
-                    Reconociendo marca, generación de carrocería, año, potencia y rareza de colección.
+                  <p className="text-[11px] font-telemetry text-zinc-400 mt-1 max-w-xs uppercase tracking-wider">
+                    Marca · Carrocería · Potencia · Rareza
                   </p>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-center p-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-zinc-400">
-                <Camera className="w-8 h-8 text-zinc-300" />
+            <div className="text-center px-5 py-6 space-y-4 max-w-md relative z-10">
+              <div className="w-14 h-14 rounded-2xl cl-pill flex items-center justify-center mx-auto text-zinc-200">
+                <Camera className="w-6 h-6 text-red-400" />
               </div>
 
-              <div>
-                <h3 className="text-base font-bold text-white">Apunta tu cámara a cualquier auto</h3>
-                <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1">
-                  La IA detectará el modelo exacto, ficha técnica completa y le asignará su categoría de rareza como si fuera un Pokémon.
+              <div className="space-y-1">
+                <h3 className="font-display text-2xl font-extrabold uppercase text-white tracking-tight">
+                  Apunta al vehículo
+                </h3>
+                <p className="text-xs text-[var(--cl-text-secondary)] leading-relaxed">
+                  Detecta marca, modelo, especificaciones técnicas y categoría de colección al instante.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-1">
                 <button
                   onClick={() => nativeCameraInputRef.current?.click()}
-                  className="px-5 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95"
+                  className="min-h-[42px] px-5 py-2.5 rounded-xl font-bold text-xs bg-white hover:bg-zinc-200 text-[#08090c] shadow-[0_8px_20px_rgba(255,255,255,0.12)] flex items-center justify-center gap-2 transition active:scale-[0.98]"
                   title="Abre la cámara oficial de tu teléfono (ideal para fotos de noche o en la calle)"
                 >
-                  <Camera className="w-4 h-4" />
-                  Tomar Foto con Cámara HD
+                  <Camera className="w-4 h-4 text-red-600" />
+                  <span>Cámara HD</span>
                 </button>
 
-                <button
-                  onClick={startCamera}
-                  className="px-4 py-2.5 rounded-xl font-bold text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/10 flex items-center gap-2 transition active:scale-95"
-                >
-                  <Camera className="w-4 h-4 text-zinc-400" />
-                  Visor Web en Vivo
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={startCamera}
+                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs cl-pill hover:bg-[#232838] text-zinc-200 flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                  >
+                    <Aperture className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Visor Live</span>
+                  </button>
 
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2.5 rounded-xl font-bold text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-white/10 flex items-center gap-2 transition active:scale-95"
-                >
-                  <Upload className="w-4 h-4 text-zinc-400" />
-                  Galería
-                </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs cl-pill hover:bg-[#232838] text-zinc-200 flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Galería</span>
+                  </button>
+                </div>
               </div>
 
               {cameraError && (
-                <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-xs text-red-200 max-w-md mx-auto text-left flex items-start gap-2 shadow-lg">
+                <div
+                  role="alert"
+                  className="p-3 rounded-xl bg-red-950/70 border border-red-500/45 text-xs text-red-200 text-left flex items-start gap-2.5"
+                >
                   <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span>{cameraError}</span>
+                  <span className="leading-relaxed">{cameraError}</span>
                 </div>
               )}
             </div>
           )}
 
-          {/* Native phone camera input (always works over HTTP / HTTPS / Android / iOS) */}
+          {/* Native phone camera input */}
           <input
             type="file"
             ref={nativeCameraInputRef}
@@ -614,25 +645,25 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
         {/* Retake / Change Photo Controls */}
         {imagePreview && !analyzing && (
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between mt-3.5 pt-3 border-t border-white/[0.08]">
             <button
               onClick={() => {
                 setImagePreview(null);
                 setIdentifiedCar(null);
                 stopCamera();
               }}
-              className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-white/[0.05] active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              Escanear otro vehículo
+              <span>Escanear otro</span>
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-semibold text-zinc-400 hover:text-white flex items-center gap-1.5 transition"
+              className="text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-white/[0.05] active:scale-95"
             >
               <Upload className="w-3.5 h-3.5" />
-              Subir otra foto
+              <span>Subir otra foto</span>
             </button>
           </div>
         )}
@@ -640,11 +671,11 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
       {/* Identified Card Result */}
       {identifiedCar && (
-        <div className="mt-6 animate-fade-in">
-          <div className="text-center mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-              <CheckCircle2 className="w-4 h-4" />
-              ¡Vehículo Identificado con Éxito!
+        <div className="mt-4 animate-fade-in">
+          <div className="text-center mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/12 border border-emerald-500/35 text-emerald-300 font-telemetry text-[11px] font-bold uppercase tracking-wider">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              Vehículo Identificado
             </span>
           </div>
 
@@ -659,4 +690,3 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
     </div>
   );
 }
-

@@ -37,8 +37,8 @@ const ProfileView = lazyWithRetry(() => import('./components/ProfileView'));
 
 function ViewFallback() {
   return (
-    <div className="py-16 flex flex-col items-center justify-center gap-3 text-zinc-500 font-mono text-xs">
-      <div className="w-6 h-6 border-2 border-zinc-600 border-t-zinc-200 rounded-full animate-spin" />
+    <div className="py-16 flex flex-col items-center justify-center gap-3 text-[var(--cl-text-secondary)] font-telemetry text-[11px] uppercase tracking-wider">
+      <div className="w-6 h-6 border-2 border-zinc-700 border-t-red-500 rounded-full animate-spin" />
       <span>Cargando módulo...</span>
     </div>
   );
@@ -227,7 +227,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#07080d] text-zinc-100 flex flex-col justify-center items-center">
+    <div className="min-h-[100dvh] bg-[var(--cl-canvas)] text-[var(--cl-text-primary)] flex flex-col justify-center items-center">
       <MobileContainer
         activeTab={activeTab}
         onTabChange={(tab) => {

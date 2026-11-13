@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Radar, Radio, MapPin, Clock, ShieldAlert, Sparkles, Navigation, CheckCircle2 } from 'lucide-react';
+import {
+  Radio, MapPin, Clock, Sparkles, Navigation, CheckCircle2, Lock, Crosshair
+} from 'lucide-react';
 import { sound } from '../utils/audio';
 import { RARITY_CONFIG, POKEDEX_CARS } from '../utils/demoData';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
@@ -196,7 +198,6 @@ export default function RadarView({ onSpotFound }) {
       }
     } catch {}
 
-    // Local fallback when static hosting (Netlify without backend/auth)
     const updated = [newSpot, ...spots];
     setSpots(updated);
     try {
@@ -205,86 +206,123 @@ export default function RadarView({ onSpotFound }) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Radar Scanner Dashboard */}
-      <div className="relative rounded-3xl bg-[#0e101a] border border-cyan-500/30 p-6 overflow-hidden shadow-2xl">
-        {/* Glow backdrop */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl -z-0"></div>
+    <div className="space-y-5 animate-fade-in pb-2">
+      {/* Radar Telemetry Scope Instrument */}
+      <div className="relative rounded-3xl cl-card cl-microgrid p-5 overflow-hidden">
+        {/* Calibrated Top Cyan Accent */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-cyan-500/8 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-          {/* Visual Radar Screen */}
-          <div className="relative w-64 h-64 rounded-full border-2 border-cyan-500/40 bg-[#07090e] flex items-center justify-center overflow-hidden shadow-inner shadow-cyan-950">
-            {/* Concentric distance rings */}
-            <div className="absolute w-48 h-48 rounded-full border border-cyan-500/20"></div>
-            <div className="absolute w-32 h-32 rounded-full border border-cyan-500/25"></div>
-            <div className="absolute w-16 h-16 rounded-full border border-cyan-500/30"></div>
+        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+          {/* Circular Telemetry Radar Dial */}
+          <div className="relative w-56 h-56 sm:w-60 sm:h-60 rounded-full border border-cyan-500/35 bg-[#07090e] flex items-center justify-center overflow-hidden shadow-[inset_0_0_32px_rgba(6,182,212,0.12)] shrink-0">
+            {/* Concentric Distance Rings */}
+            <div className="absolute w-44 h-44 rounded-full border border-cyan-500/18" />
+            <div className="absolute w-28 h-28 rounded-full border border-cyan-500/22" />
+            <div className="absolute w-14 h-14 rounded-full border border-cyan-500/28" />
+
+            {/* Range Ring Scale Labels */}
+            <span className="absolute top-2 font-telemetry text-[8px] text-cyan-500/55 uppercase tracking-widest pointer-events-none">
+              1.5 KM
+            </span>
+            <span className="absolute bottom-2 font-telemetry text-[8px] text-cyan-500/55 uppercase tracking-widest pointer-events-none">
+              N · 180°
+            </span>
 
             {/* Radar Crosshairs */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-full h-[1px] bg-cyan-500/20"></div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-full h-[1px] bg-cyan-500/15" />
             </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-full w-[1px] bg-cyan-500/20"></div>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="h-full w-[1px] bg-cyan-500/15" />
             </div>
 
             {/* Radar Sweep Light */}
             <div className="absolute inset-0 origin-center animate-radar pointer-events-none">
-              <div className="w-1/2 h-1/2 bg-gradient-to-br from-cyan-400/40 to-transparent transform origin-bottom-right rounded-tl-full"></div>
+              <div className="w-1/2 h-1/2 bg-gradient-to-br from-cyan-400/30 to-transparent transform origin-bottom-right rounded-tl-full" />
             </div>
 
             {/* User Center Pin */}
-            <div className="relative z-10 w-4 h-4 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/80 border-2 border-white animate-pulse"></div>
+            <div className="relative z-10 w-3.5 h-3.5 rounded-full bg-cyan-400 border-2 border-white shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
 
-            {/* Spotted car blips on radar */}
-            {spots.map((spot, idx) => {
-              const angles = [45, 135, 230, 310, 180];
+            {/* Spotted Car Blips */}
+            {spots.slice(0, 8).map((spot, idx) => {
+              const angles = [42, 132, 224, 308, 178, 86, 268, 14];
               const angle = (angles[idx % angles.length] * Math.PI) / 180;
-              const dist = 30 + ((spot.distanceMeters || 600) / 1500) * 80;
+              const dist = 26 + Math.min(1, (spot.distanceMeters || 600) / 1500) * 70;
               const x = Math.cos(angle) * dist;
               const y = Math.sin(angle) * dist;
               const isClaimed = claimedIds.has(spot.id);
+              const isSelected = selectedSpot?.id === spot.id;
 
               return (
-                <div
+                <button
+                  type="button"
                   key={spot.id}
                   onClick={() => setSelectedSpot(spot)}
                   style={{ transform: `translate(${x}px, ${y}px)` }}
-                  title={`${spot.brand} ${spot.model}`}
-                  className={`absolute w-3.5 h-3.5 rounded-full cursor-pointer transition-transform hover:scale-150 z-20 ${
+                  title={`${spot.brand} ${spot.model} (${spot.distanceMeters}m)`}
+                  aria-label={`Objetivo ${spot.brand} ${spot.model} a ${spot.distanceMeters} metros`}
+                  className={`absolute w-3.5 h-3.5 rounded-full cursor-pointer transition-transform hover:scale-150 focus:outline-none z-20 border border-white ${
+                    isSelected ? 'ring-2 ring-white ring-offset-1 ring-offset-[#07090e] scale-125' : ''
+                  } ${
                     isClaimed
-                      ? 'bg-emerald-400 shadow-emerald-400/70 border border-white'
+                      ? 'bg-emerald-400'
                       : spot.rarity === 'Legendario'
-                      ? 'bg-yellow-400 shadow-yellow-400/80 animate-ping border border-white'
+                      ? 'bg-amber-400'
                       : spot.rarity === 'Histórico'
-                      ? 'bg-amber-500 shadow-amber-500/80 animate-ping border border-white'
-                      : 'bg-purple-400 shadow-purple-400/80 border border-white'
+                      ? 'bg-orange-500'
+                      : 'bg-cyan-300'
                   }`}
                 />
               );
             })}
           </div>
 
-          {/* Radar Info Header */}
+          {/* Radar Telemetry Summary */}
           <div className="flex-1 space-y-3 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold tracking-wide">
-              <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              SISTEMA DE ALERTA DE PROXIMIDAD ACTIVO
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[10px] font-telemetry font-bold uppercase tracking-widest">
+              <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
+              <span>Telemetría de Proximidad Activa</span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Radar de Caza Callejera
-            </h2>
-            <p className="text-sm text-zinc-300 leading-relaxed max-w-xl">
-              Cuando un spotter encuentra un vehículo <strong className="text-amber-400">Legendario, Histórico o Raro</strong>, la red emite un pulso de proximidad con su silueta en gris y radio estimado para que corras a encontrarlo.
-            </p>
+            <div>
+              <h2 className="font-display text-3xl font-extrabold text-white uppercase tracking-tight leading-none">
+                Radar de Caza Callejera
+              </h2>
+              <p className="text-xs text-[var(--cl-text-secondary)] leading-relaxed max-w-md mt-2">
+                Cuando un spotter detecta un vehículo <strong className="text-amber-300 font-semibold">Legendario, Histórico o Raro</strong>, la red transmite su silueta y distancia estimada para reclamarlo en campo.
+              </p>
+            </div>
 
-            <div className="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+            {selectedSpot && (
+              <div className="p-2.5 rounded-xl cl-panel flex items-center justify-between gap-2 text-left animate-fade-in">
+                <div className="min-w-0">
+                  <div className="text-[9px] font-telemetry text-cyan-400 uppercase tracking-wider flex items-center gap-1">
+                    <Crosshair className="w-3 h-3" /> OBJETIVO FIJADO
+                  </div>
+                  <div className="text-xs font-bold text-white truncate">
+                    {selectedSpot.brand} {selectedSpot.model} ·{' '}
+                    <span className="font-telemetry text-cyan-300">{selectedSpot.distanceMeters}m</span>
+                  </div>
+                </div>
+                {!claimedIds.has(selectedSpot.id) && (
+                  <button
+                    onClick={() => handleClaim(selectedSpot)}
+                    className="px-2.5 py-1.5 rounded-lg bg-cyan-500 text-[#08090c] font-bold text-[10px] shrink-0 active:scale-95 transition"
+                  >
+                    Reclamar
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="pt-1 flex flex-wrap gap-2.5 justify-center md:justify-start">
               <button
                 onClick={simulateRandomAlert}
-                className="px-4 py-2 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition flex items-center gap-2"
+                className="min-h-[40px] px-4 py-2 rounded-xl cl-pill hover:bg-[#232838] text-cyan-300 border-cyan-500/35 text-xs font-bold transition flex items-center gap-2 active:scale-[0.98]"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                Simular Alerta de Caza Cercana
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Simular Alerta Cercana</span>
               </button>
             </div>
           </div>
@@ -293,121 +331,168 @@ export default function RadarView({ onSpotFound }) {
 
       {/* Nearby Active Spots Feed */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 px-0.5">
           <div className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-red-400" />
-            <h3 className="text-lg font-bold text-white">Avistamientos Activos en tu Zona</h3>
+            <MapPin className="w-4 h-4 text-red-400" />
+            <h3 className="font-display text-xl font-extrabold uppercase tracking-tight text-white">
+              Avistamientos en Zona
+            </h3>
           </div>
-          <span className="text-xs text-zinc-400 font-mono">
-            {spots.length} objetivos detectados
+          <span className="text-[11px] text-[var(--cl-text-secondary)] font-telemetry uppercase">
+            {String(spots.length).padStart(2, '0')} objetivos
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {spots.map((spot) => {
-            const isClaimed = claimedIds.has(spot.id);
-            const rarityCfg = RARITY_CONFIG[spot.rarity] || RARITY_CONFIG['Común'];
-
-            return (
-              <div
-                key={spot.id}
-                className={`rounded-2xl border bg-[#11131e] overflow-hidden transition-all duration-300 hover:border-zinc-500 shadow-xl flex flex-col justify-between ${
-                  isClaimed ? 'border-emerald-500/50' : 'border-white/10'
-                }`}
-              >
-                {/* Silhouette / Photo with Grayscale Filter */}
-                <div className="relative h-44 bg-black/80 overflow-hidden flex items-center justify-center">
-                  <img
-                    src={spot.imageSilhouette}
-                    alt={spot.model}
-                    className={`w-full h-full object-cover transition-all duration-500 ${
-                      isClaimed
-                        ? 'grayscale-0 filter-none scale-100'
-                        : 'grayscale contrast-125 brightness-50 blur-[1px]'
-                    }`}
-                  />
-
-                  {/* Silhouette Overlay Badge if Not Claimed */}
-                  {!isClaimed ? (
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-4">
-                      <div className="w-12 h-12 rounded-full bg-black/60 border border-white/20 flex items-center justify-center mb-1 text-yellow-400 text-xl font-black shadow-lg">
-                        ?
-                      </div>
-                      <span className="text-xs font-bold tracking-wider text-zinc-200 uppercase">
-                        Silueta Bloqueada
-                      </span>
-                      <span className="text-[11px] text-zinc-400">
-                        Fotografíalo en la calle para revelar a color
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-xs font-bold flex items-center gap-1 shadow-md">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Descubierto
-                    </div>
-                  )}
-
-                  {/* Rarity Pill */}
-                  <div className="absolute top-2 left-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${rarityCfg.bgBadge}`}>
-                      {spot.rarity}
-                    </span>
-                  </div>
-
-                  {/* Distance badge */}
-                  <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-[11px] font-mono text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
-                    <Navigation className="w-3 h-3 text-cyan-400" />
-                    a {spot.distanceMeters || 650}m de ti
-                  </div>
-                </div>
-
-                {/* Spot Details */}
-                <div className="p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-baseline justify-between">
-                      <h4 className="text-base font-extrabold text-white">
-                        {spot.brand} <span className="text-zinc-300">{spot.model}</span>
-                      </h4>
-                      <span className="text-xs font-mono text-zinc-400">{spot.year}</span>
-                    </div>
-
-                    <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-zinc-500" />
-                      {spot.address || 'Av. Costanera'}
-                    </p>
-
-                    <div className="flex items-center gap-3 mt-3 text-xs text-zinc-400 border-t border-white/5 pt-2">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-amber-400" />
-                        Quedan ~20 min
-                      </span>
-                      <span>•</span>
-                      <span>Por: {spot.spottedBy || 'Spotter'}</span>
-                    </div>
-                  </div>
-
-                  {/* Claim Button */}
-                  <div className="mt-4">
-                    {isClaimed ? (
-                      <div className="w-full py-2 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-xs font-bold text-center">
-                        ✓ Ya desbloqueado en tu colección
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleClaim(spot)}
-                        className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-600/20 flex items-center justify-center gap-2 transition active:scale-95"
-                      >
-                        <ShieldAlert className="w-4 h-4" />
-                        ¡Estoy aquí! Identificar y Reclamar
-                      </button>
-                    )}
-                  </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="rounded-2xl cl-card overflow-hidden animate-pulse">
+                <div className="h-40 bg-white/[0.04]" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 w-2/3 bg-white/[0.06] rounded" />
+                  <div className="h-3 w-1/2 bg-white/[0.04] rounded" />
+                  <div className="h-9 w-full bg-white/[0.06] rounded-xl" />
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : spots.length === 0 ? (
+          <div className="py-12 px-5 text-center rounded-3xl cl-card space-y-3">
+            <Radio className="w-7 h-7 text-cyan-400 mx-auto" />
+            <div className="space-y-1">
+              <h4 className="font-display text-xl font-bold uppercase text-white">Sin señales activas</h4>
+              <p className="text-xs text-[var(--cl-text-secondary)] max-w-xs mx-auto">
+                No hay alertas recientes en tu radio. Simula un avistamiento cercano o escanea un auto en la calle.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {spots.map((spot) => {
+              const isClaimed = claimedIds.has(spot.id);
+              const isSelected = selectedSpot?.id === spot.id;
+              const rarityCfg = RARITY_CONFIG[spot.rarity] || RARITY_CONFIG['Común'];
+
+              return (
+                <div
+                  key={spot.id}
+                  className={`rounded-2xl cl-card overflow-hidden transition-all duration-300 flex flex-col justify-between ${
+                    isClaimed
+                      ? 'border-emerald-500/45'
+                      : isSelected
+                      ? 'border-cyan-400/60 ring-1 ring-cyan-400/30'
+                      : 'hover:border-white/25'
+                  }`}
+                >
+                  {/* Silhouette / Photo */}
+                  <div className="relative h-44 bg-[#06080c] overflow-hidden flex items-center justify-center">
+                    <img
+                      src={spot.imageSilhouette}
+                      alt={spot.model}
+                      className={`w-full h-full object-cover transition-all duration-500 ${
+                        isClaimed
+                          ? 'grayscale-0 filter-none scale-100'
+                          : 'grayscale contrast-125 brightness-[0.42] blur-[1.5px]'
+                      }`}
+                    />
+
+                    {/* Silhouette Overlay Badge if Not Claimed */}
+                    {!isClaimed ? (
+                      <div className="absolute inset-0 bg-[#07090e]/45 backdrop-blur-[1.5px] flex flex-col items-center justify-center text-center p-4">
+                        <div className="w-11 h-11 rounded-2xl bg-[#0b0e15]/85 border border-white/15 flex items-center justify-center mb-1.5 text-amber-400 shadow-lg">
+                          <Lock className="w-4 h-4" />
+                        </div>
+                        <span className="text-[11px] font-telemetry font-bold tracking-widest text-zinc-100 uppercase">
+                          Silueta Bloqueada
+                        </span>
+                        <span className="text-[11px] text-zinc-400 mt-0.5">
+                          Reclámalo en terreno para revelar
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-emerald-500/90 text-[#05110b] text-[10px] font-telemetry font-bold uppercase flex items-center gap-1 shadow-md">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Descubierto
+                      </div>
+                    )}
+
+                    {/* Rarity Pill */}
+                    <div className="absolute top-2.5 left-2.5">
+                      <span className={`text-[10px] font-telemetry uppercase px-2 py-0.5 rounded-md ${rarityCfg.bgBadge}`}>
+                        {spot.rarity}
+                      </span>
+                    </div>
+
+                    {/* Distance badge */}
+                    <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-[#090b10]/88 backdrop-blur-md text-[10px] font-telemetry font-semibold text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
+                      <Navigation className="w-3 h-3 text-cyan-400" />
+                      <span>{spot.distanceMeters || 650} m</span>
+                    </div>
+                  </div>
+
+                  {/* Spot Details */}
+                  <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+                    <div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <h4 className="font-display text-xl font-extrabold uppercase text-white tracking-tight truncate">
+                          {spot.brand} <span className="text-zinc-400 font-bold">{spot.model}</span>
+                        </h4>
+                        <span className="text-[11px] font-telemetry text-zinc-400 shrink-0">{spot.year}</span>
+                      </div>
+
+                      <p className="text-xs text-[var(--cl-text-secondary)] mt-1 flex items-center gap-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                        <span className="truncate">{spot.address || 'Av. Costanera'}</span>
+                      </p>
+
+                      {(spot.hp > 0 || spot.topSpeed > 0 || spot.zeroToHundred > 0) && (
+                        <div className="grid grid-cols-3 divide-x divide-white/[0.07] rounded-xl cl-panel mt-3 py-1.5 text-center font-telemetry">
+                          <div className="px-1">
+                            <span className="text-[8px] text-[var(--cl-text-muted)] uppercase block">CV</span>
+                            <span className="text-[11px] font-bold text-zinc-200">{spot.hp || '—'}</span>
+                          </div>
+                          <div className="px-1">
+                            <span className="text-[8px] text-[var(--cl-text-muted)] uppercase block">0–100</span>
+                            <span className="text-[11px] font-bold text-zinc-200">{spot.zeroToHundred ? `${spot.zeroToHundred}s` : '—'}</span>
+                          </div>
+                          <div className="px-1">
+                            <span className="text-[8px] text-[var(--cl-text-muted)] uppercase block">KM/H</span>
+                            <span className="text-[11px] font-bold text-zinc-200">{spot.topSpeed || '—'}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-2 mt-3 text-[11px] text-zinc-400 border-t border-white/[0.06] pt-2.5 font-telemetry">
+                        <span className="flex items-center gap-1 text-amber-300">
+                          <Clock className="w-3 h-3" /> ~20 min
+                        </span>
+                        <span className="truncate text-zinc-500">{spot.spottedBy || 'Spotter'}</span>
+                      </div>
+                    </div>
+
+                    {/* Claim Button */}
+                    <div>
+                      {isClaimed ? (
+                        <div className="w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/35 text-emerald-300 text-xs font-semibold text-center flex items-center justify-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Reclamado en colección</span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleClaim(spot)}
+                          className="w-full min-h-[40px] py-2.5 px-4 rounded-xl font-bold text-xs bg-white hover:bg-zinc-200 text-[#08090c] shadow-[0_8px_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 transition active:scale-[0.98]"
+                        >
+                          <Crosshair className="w-4 h-4 text-red-600" />
+                          <span>Identificar y Reclamar</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

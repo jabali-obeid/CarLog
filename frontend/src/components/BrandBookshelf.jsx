@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, Warehouse, Sparkles, Box } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Warehouse, Box } from 'lucide-react';
 
 export default function BrandBookshelf({
   garage = [],
@@ -290,24 +290,24 @@ export default function BrandBookshelf({
   return (
     <div className="space-y-4 max-w-6xl mx-auto select-none">
       {/* Header Monotype x Colophon Style */}
-      <div className="text-center space-y-1 pb-2 border-b border-zinc-800 px-2">
-        <div className="inline-flex items-center gap-2 text-[10px] font-mono tracking-widest text-zinc-400 uppercase">
+      <div className="text-center space-y-1.5 pb-3 border-b border-white/[0.08] px-2">
+        <div className="inline-flex items-center gap-2 text-[10px] font-telemetry tracking-widest text-[var(--cl-text-muted)] uppercase">
           <span>CARLOG</span>
-          <span className="text-zinc-500 font-black">×</span>
+          <span className="text-red-500 font-bold">×</span>
           <span>MANUFACTURERS ARCHIVE</span>
         </div>
-        <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
-          Biblioteca de Marcas del Garage
+        <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
+          Biblioteca de Marcas
         </h2>
-        <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
-          Desliza horizontalmente entre los libros. Haz clic en un libro para abrir sus autos en el taller 3D.
+        <p className="text-xs text-[var(--cl-text-secondary)] max-w-xs mx-auto">
+          Desliza horizontalmente y toca un volumen para abrir sus vehículos en el taller 3D.
         </p>
 
         {/* Quick Access Pills: Ver Toda la Flota & Catálogo 3D Showroom */}
         <div className="pt-2 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => onSelectBrand('ALL')}
-            className="px-4 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[11px] font-mono font-bold text-zinc-200 hover:text-white transition flex items-center gap-1.5 shadow"
+            className="px-4 py-1.5 rounded-full cl-pill hover:bg-[#232838] text-[11px] font-telemetry font-bold text-zinc-200 hover:text-white transition flex items-center gap-1.5 active:scale-95"
           >
             <Warehouse className="w-3.5 h-3.5 text-zinc-400" />
             <span>
@@ -318,10 +318,10 @@ export default function BrandBookshelf({
           {onToggleShowroom && (
             <button
               onClick={onToggleShowroom}
-              className={`px-4 py-1.5 rounded-full border text-[11px] font-mono font-bold transition flex items-center gap-1.5 shadow ${
+              className={`px-4 py-1.5 rounded-full border text-[11px] font-telemetry font-bold transition flex items-center gap-1.5 active:scale-95 ${
                 showingShowroom
-                  ? 'bg-zinc-100 text-zinc-950 border-white'
-                  : 'bg-zinc-950 hover:bg-zinc-900 text-zinc-300 border-zinc-800'
+                  ? 'bg-white text-[#08090c] border-white shadow-sm'
+                  : 'cl-panel text-zinc-300 hover:text-white hover:border-white/20'
               }`}
             >
               <Box className="w-3.5 h-3.5" />
@@ -334,7 +334,7 @@ export default function BrandBookshelf({
       </div>
 
       {/* The Bookshelf Showcase Container */}
-      <div className="relative rounded-3xl bg-[#08090e] border border-zinc-800 p-3 sm:p-6 shadow-2xl overflow-hidden min-h-[460px] flex flex-col justify-end">
+      <div className="relative rounded-3xl cl-card cl-microgrid p-3 sm:p-6 overflow-hidden min-h-[450px] flex flex-col justify-end">
         {/* Ambient Top Studio Lighting */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
 
