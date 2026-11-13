@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import MobileContainer from './components/MobileContainer';
+import ShowroomGallery from './components/ShowroomGallery';
 import {
   resolveCurrentSession,
   logoutUser,
@@ -49,7 +50,10 @@ export default function App() {
   const [garage, setGarage] = useState([]);
   const [showroomMode, setShowroomMode] = useState(false);
   const [showroomCars, setShowroomCars] = useState([]);
+  const [showroomLoading, setShowroomLoading] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
+  const [target3DCarId, setTarget3DCarId] = useState(null);
+  const [custom3DCar, setCustom3DCar] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsVersion, setSettingsVersion] = useState(0);
   const [authOpen, setAuthOpen] = useState(false);
@@ -128,20 +132,50 @@ export default function App() {
     loadGarage(currentUser);
   }, [currentUser, settingsVersion, loadGarage]);
 
+  const ensureShowroomCatalog = useCallback(async () => {
+    if (showroomCars.length > 0) return showroomCars;
+    try {
+      const res = await fetch('/data/showroom_catalog.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setShowroomCars(data);
+          return data;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load showroom catalog:', e);
+    }
+    return [];
+  }, [showroomCars]);
+
+  useEffect(() => {
+    if ((activeTab === 'cardex' || showroomMode) && showroomCars.length === 0) {
+      let cancelled = false;
+      fetch('/data/showroom_catalog.json')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!cancelled && Array.isArray(data)) {
+            setShowroomCars(data);
+          }
+        })
+        .catch((e) => console.warn('Could not load showroom catalog:', e));
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [activeTab, showroomMode, showroomCars.length]);
+
   // Lazy-load 60-model 3D showroom catalog on demand (read-only, separate from user progress)
   const handleToggleShowroom = async () => {
     if (!showroomMode && showroomCars.length === 0) {
-      try {
-        const res = await fetch('/data/showroom_catalog.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) setShowroomCars(data);
-        }
-      } catch (e) {
-        console.warn('Could not load showroom catalog:', e);
-      }
+      setShowroomLoading(true);
+      await ensureShowroomCatalog();
+      setShowroomLoading(false);
     }
     setSelectedBrand(null);
+    setTarget3DCarId(null);
+    setCustom3DCar(null);
     setShowroomMode((prev) => !prev);
   };
 
@@ -157,6 +191,11 @@ export default function App() {
     const newCar = {
       ...car,
       id: car.id || `car-${Date.now()}`,
+      model: car.model || car.name || 'Modelo',
+      zeroToHundred: parseFloat(car.zeroToHundred) || 0,
+      topSpeed: parseInt(car.topSpeed, 10) || 0,
+      imageUrl: car.imageUrl || car.image || '',
+      funFact: car.funFact || car.description || '',
       capturedAt: car.capturedAt || new Date().toISOString(),
       userCaptured: true
     };
@@ -177,18 +216,73 @@ export default function App() {
     setActiveTab('scanner');
   };
 
-  const savedCarIds = new Set(garage.map(c => c.id || `${c.brand}-${c.model || c.name}`));
+  const handleOpenCarIn3D = async (car) => {
+    if (!car) return;
+    const catalog = await ensureShowroomCatalog();
+    const normalizedCar = {
+      ...car,
+      model: car.model || car.name || 'Modelo',
+      zeroToHundred: parseFloat(car.zeroToHundred) || 0,
+      topSpeed: parseInt(car.topSpeed, 10) || 0,
+      imageUrl: car.imageUrl || car.image || '',
+      funFact: car.funFact || car.description || ''
+    };
+    const aliasIdMap = {
+      'ferrari-f40': 'car-seed-1',
+      'toyota-corolla': 'toyota-corolla-seed'
+    };
+    const lookupId = aliasIdMap[normalizedCar.id] || normalizedCar.id;
+    const catalogMatch = catalog.find((c) => c.id === lookupId || c.id === normalizedCar.id);
+    if (catalogMatch) {
+      setCustom3DCar(null);
+      setTarget3DCarId(catalogMatch.id);
+    } else {
+      setCustom3DCar(normalizedCar);
+      setTarget3DCarId(normalizedCar.id);
+    }
+    setShowroomMode(true);
+    setSelectedBrand('ALL');
+    setActiveTab('garage');
+  };
+
+  const savedCarIds = new Set(
+    garage
+      .flatMap((c) => [c.id, c.brand && (c.model || c.name) ? `${c.brand}-${c.model || c.name}` : null])
+      .filter(Boolean)
+  );
 
   // Render Garage (Personal Collection or 3D Showroom Catalog)
   const renderGarageContent = () => {
-    const displayedFleet = showroomMode ? showroomCars : garage;
+    const baseFleet = showroomMode ? showroomCars : garage;
+    const displayedFleet =
+      showroomMode && custom3DCar && !baseFleet.some((c) => c.id === custom3DCar.id)
+        ? [custom3DCar, ...baseFleet]
+        : baseFleet;
 
     if (selectedBrand === null) {
+      if (showroomMode) {
+        return (
+          <ShowroomGallery
+            cars={showroomCars}
+            savedIds={savedCarIds}
+            onSaveToGarage={handleSaveToGarage}
+            onOpenIn3D={handleOpenCarIn3D}
+            onBackToBookshelf={handleToggleShowroom}
+            title="Catálogo 3D"
+            loadingCatalog={showroomLoading}
+          />
+        );
+      }
+
       return (
         <Suspense fallback={<ViewFallback />}>
           <BrandBookshelf
             garage={displayedFleet}
-            onSelectBrand={(brand) => setSelectedBrand(brand)}
+            onSelectBrand={(brand) => {
+              setTarget3DCarId(null);
+              setCustom3DCar(null);
+              setSelectedBrand(brand);
+            }}
             showingShowroom={showroomMode}
             onToggleShowroom={handleToggleShowroom}
             showroomCount={showroomCars.length || 60}
@@ -197,20 +291,27 @@ export default function App() {
       );
     }
 
+    const filteredFleet =
+      selectedBrand === 'ALL'
+        ? displayedFleet
+        : displayedFleet.filter((c) => (c.brand || '').toLowerCase().includes(selectedBrand.toLowerCase()));
+
     return (
       <Suspense fallback={<ViewFallback />}>
         <NfsGarageView
-          garage={
-            selectedBrand === 'ALL'
-              ? displayedFleet
-              : displayedFleet.filter(c => (c.brand || '').toLowerCase().includes(selectedBrand.toLowerCase()))
-          }
+          key={`garage-3d-${selectedBrand}-${target3DCarId || 'default'}`}
+          garage={filteredFleet}
+          initialCarId={target3DCarId}
           selectedBrandTitle={
             showroomMode
               ? `Showroom // ${selectedBrand === 'ALL' ? 'Todos' : selectedBrand}`
               : (selectedBrand === 'ALL' ? 'Todos los Fabricantes' : selectedBrand)
           }
-          onBackToBookshelf={() => setSelectedBrand(null)}
+          onBackToBookshelf={() => {
+            setSelectedBrand(null);
+            setTarget3DCarId(null);
+            setCustom3DCar(null);
+          }}
           onDeleteCar={!showroomMode ? handleDeleteFromGarage : undefined}
           onOpenScanner={() => setActiveTab('scanner')}
         />
@@ -232,7 +333,11 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          if (tab !== 'garage') setSelectedBrand(null);
+          if (tab !== 'garage') {
+            setSelectedBrand(null);
+            setTarget3DCarId(null);
+            setCustom3DCar(null);
+          }
         }}
         garage={garage}
         onSaveToGarage={handleSaveToGarage}
@@ -241,6 +346,10 @@ export default function App() {
         user={currentUser}
         onOpenAuth={() => setAuthOpen(true)}
         onLogout={handleLogout}
+        showroomCars={showroomCars}
+        showroomLoading={showroomLoading}
+        onOpenCarIn3D={handleOpenCarIn3D}
+        isGarageShowroom={showroomMode && selectedBrand === null}
         renderGarageContent={renderGarageContent}
         renderScannerContent={() => (
           <Suspense fallback={<ViewFallback />}>

@@ -6,8 +6,14 @@ import {
 import { RARITY_CONFIG } from '../utils/demoData';
 import Car3DViewer from './Car3DViewer';
 
-export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner, onBackToBookshelf, selectedBrandTitle }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner, onBackToBookshelf, selectedBrandTitle, initialCarId = null }) {
+  const [selectedIndex, setSelectedIndex] = useState(() => {
+    if (!initialCarId || garage.length === 0) return 0;
+    const found = garage.findIndex(
+      (c) => c.id === initialCarId || `${c.brand}-${c.model || c.name}` === initialCarId
+    );
+    return found >= 0 ? found : 0;
+  });
   const [neonColor, setNeonColor] = useState('cyan'); // 'cyan' | 'purple' | 'red' | 'green' | 'amber'
   const [viewMode3D, setViewMode3D] = useState(true); // Default to 3D interactive mode!
   const [generating3D, setGenerating3D] = useState(false);
