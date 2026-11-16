@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>CarLog — Spotting y Catálogo de Autos</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <meta name="theme-color" content="#08090c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CarLog" />
+  <meta name="application-name" content="CarLog" />
+  <meta name="msapplication-TileColor" content="#08090c" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="description"
+    content="Fotografía autos en la calle, descubre su rareza con IA, explora modelos 3D en tu taller NFSU2 y rastrea spawns en el radar." />
+
+  <!-- Automotive Display, Technical Sans & Tabular Telemetry Monospace Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    html,
+    body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px)
+    }
+  </style>
+  <script>
+    // Pega aqui tu URL publica de Cloudflare R2 cuando subas /models (ej: 'https://pub-xxxx.r2.dev')
+    window.__CARLOG_MODELS_BASE_URL = https://pub-299dc100255445ab9f688031f2de499d.r2.dev || '';
+  </script>
+  <script type="module" crossorigin src="/assets/index-Bxf3BOzh.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-WkwZ5CU-.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-icons-DsGkn9ut.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-BtVtsMWH.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-DxFOITRO.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-DHLPVjoH.css">
+</head>
+
+<body class="bg-[#08090c] text-[#f4f5f7] select-none antialiased">
+  <div id="root"></div>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => {
+            console.log('🚀 [CarDex PWA] Service Worker activo y registrado:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('⚠️ [CarDex PWA] Error registrando Service Worker:', err);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>
