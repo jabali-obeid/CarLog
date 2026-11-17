@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Smartphone, Tablet, QrCode, ShieldAlert, ArrowRight, Monitor, Laptop } from 'lucide-react';
 
 export default function DesktopGate({ onBypass }) {
-  const lanUrl = `http://${window.location.hostname || '192.168.1.213'}:${window.location.port || '5000'}`;
+  const lanUrl = window.location.href;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=10&data=${encodeURIComponent(lanUrl)}`;
 
   return (
@@ -13,7 +13,7 @@ export default function DesktopGate({ onBypass }) {
 
       {/* Main Gate Card */}
       <div className="relative z-10 max-w-md w-full rounded-3xl bg-[#0c0e14] border border-zinc-800/80 p-8 shadow-2xl flex flex-col items-center text-center space-y-6">
-        
+
         {/* Device Restriction Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono font-bold tracking-wider uppercase shadow">
           <ShieldAlert className="w-4 h-4 text-red-400 animate-pulse" />
@@ -35,9 +35,9 @@ export default function DesktopGate({ onBypass }) {
 
         {/* QR Code Container */}
         <div className="p-4 bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center border-4 border-amber-400/40">
-          <img 
-            src={qrUrl} 
-            alt="Código QR para celular y tablet" 
+          <img
+            src={qrUrl}
+            alt="Código QR para celular y tablet"
             className="w-52 h-52 object-contain rounded-lg"
             onError={(e) => {
               // Fallback placeholder if offline

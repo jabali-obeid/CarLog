@@ -512,76 +512,93 @@ export default function Car3DViewer({ car, neonColorHex = '#00F0FF' }) {
 
     let isMounted = true;
     let activeDracoLoader = null;
+    let loadTimer = null;
 
-    if (targetGlb) {
+    const resolveModelUrl = (url) => {
+      if (!url || !url.startsWith('/models/')) return url;
+      const base = (import.meta.env.VITE_MODELS_BASE_URL || '').trim().replace(/\/+$/, '');
+      if (!base) return url;
+      return base.endsWith('/models')
+        ? `${base}${url.slice('/models'.length)}`
+        : `${base}${url}`;
+    };
+
+    const resolvedGlbUrl = resolveModelUrl(targetGlb);
+
+    if (resolvedGlbUrl) {
       setLoading(true);
       setLoadProgress(0);
 
-      activeDracoLoader = new DRACOLoader();
-      activeDracoLoader.setDecoderPath('/draco/');
+      // Debounce rapid arrow switching so skipped models don't download unnecessarily
+      loadTimer = setTimeout(() => {
+        if (!isMounted) return;
 
-      const gltfLoader = new GLTFLoader();
-      gltfLoader.setDRACOLoader(activeDracoLoader);
+        activeDracoLoader = new DRACOLoader();
+        activeDracoLoader.setDecoderPath('/draco/');
 
-      gltfLoader.load(
-        targetGlb,
-        (gltf) => {
-          if (!isMounted) return;
-          const model = gltf.scene;
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.setDRACOLoader(activeDracoLoader);
 
-          // Auto-orientation check: detect if vehicle was exported on its nose/tail (Z-up vs Y-up)
-          const initialBox = new THREE.Box3().setFromObject(model);
-          const initialSize = new THREE.Vector3();
-          initialBox.getSize(initialSize);
+        gltfLoader.load(
+          resolvedGlbUrl,
+          (gltf) => {
+            if (!isMounted) return;
+            const model = gltf.scene;
 
-          if (initialSize.y > initialSize.z && initialSize.y > initialSize.x) {
-            model.rotation.x = -Math.PI / 2;
-            model.updateMatrixWorld(true);
-          }
-          
-          // Auto center and scale model cleanly
-          const box = new THREE.Box3().setFromObject(model);
-          const size = new THREE.Vector3();
-          box.getSize(size);
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 4.2 / maxDim;
-          model.scale.set(scale, scale, scale);
-          model.updateMatrixWorld(true);
+            // Auto-orientation check: detect if vehicle was exported on its nose/tail (Z-up vs Y-up)
+            const initialBox = new THREE.Box3().setFromObject(model);
+            const initialSize = new THREE.Vector3();
+            initialBox.getSize(initialSize);
 
-          const updatedBox = new THREE.Box3().setFromObject(model);
-          const center = new THREE.Vector3();
-          updatedBox.getCenter(center);
-          model.position.x = -center.x;
-          model.position.z = -center.z;
-          model.position.y = -updatedBox.min.y + 0.02;
-
-          model.traverse((node) => {
-            if (node.isMesh) {
-              node.castShadow = true;
-              node.receiveShadow = true;
+            if (initialSize.y > initialSize.z && initialSize.y > initialSize.x) {
+              model.rotation.x = -Math.PI / 2;
+              model.updateMatrixWorld(true);
             }
-          });
+            
+            // Auto center and scale model cleanly
+            const box = new THREE.Box3().setFromObject(model);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 4.2 / maxDim;
+            model.scale.set(scale, scale, scale);
+            model.updateMatrixWorld(true);
 
-          scene.add(model);
-          setModelType('real-glb');
-          setLoadProgress(100);
-          setLoading(false);
-        },
-        (xhr) => {
-          if (!isMounted) return;
-          if (xhr.total > 0) {
-            setLoadProgress(Math.min(99, Math.round((xhr.loaded / xhr.total) * 100)));
+            const updatedBox = new THREE.Box3().setFromObject(model);
+            const center = new THREE.Vector3();
+            updatedBox.getCenter(center);
+            model.position.x = -center.x;
+            model.position.z = -center.z;
+            model.position.y = -updatedBox.min.y + 0.02;
+
+            model.traverse((node) => {
+              if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+              }
+            });
+
+            scene.add(model);
+            setModelType('real-glb');
+            setLoadProgress(100);
+            setLoading(false);
+          },
+          (xhr) => {
+            if (!isMounted) return;
+            if (xhr.total > 0) {
+              setLoadProgress(Math.min(99, Math.round((xhr.loaded / xhr.total) * 100)));
+            }
+          },
+          (err) => {
+            if (!isMounted) return;
+            console.warn('Failed loading target GLB, building specific procedural vehicle:', err);
+            const customMesh = buildVehicleSpecificModel(car);
+            scene.add(customMesh);
+            setModelType('procedural');
+            setLoading(false);
           }
-        },
-        (err) => {
-          if (!isMounted) return;
-          console.warn('Failed loading target GLB, building specific procedural vehicle:', err);
-          const customMesh = buildVehicleSpecificModel(car);
-          scene.add(customMesh);
-          setModelType('procedural');
-          setLoading(false);
-        }
-      );
+        );
+      }, 280);
     } else {
       // Build distinct procedural model for Mustang, BMW M3, Corolla, etc.
       const customMesh = buildVehicleSpecificModel(car);
@@ -640,6 +657,7 @@ export default function Car3DViewer({ car, neonColorHex = '#00F0FF' }) {
 
     return () => {
       isMounted = false;
+      if (loadTimer !== null) clearTimeout(loadTimer);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       renderer.domElement.removeEventListener('webglcontextlost', handleContextLost, false);
       renderer.domElement.removeEventListener('webglcontextrestored', handleContextRestored, false);

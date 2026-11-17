@@ -32,7 +32,6 @@ const NfsGarageView = lazyWithRetry(() => import('./components/NfsGarageView'));
 const BrandBookshelf = lazyWithRetry(() => import('./components/BrandBookshelf'));
 const RadarView = lazyWithRetry(() => import('./components/RadarView'));
 const SettingsModal = lazyWithRetry(() => import('./components/SettingsModal'));
-const DesktopGate = lazyWithRetry(() => import('./components/DesktopGate'));
 const AuthModal = lazyWithRetry(() => import('./components/AuthModal'));
 const ProfileView = lazyWithRetry(() => import('./components/ProfileView'));
 
@@ -59,8 +58,6 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [radarSelectedPreset, setRadarSelectedPreset] = useState(null);
-  const [isAllowedDevice, setIsAllowedDevice] = useState(true);
-  const [devBypass, setDevBypass] = useState(false);
 
   // Resolve initial Supabase/local session and subscribe to auth updates
   useEffect(() => {
@@ -103,23 +100,6 @@ export default function App() {
     await logoutUser();
     setCurrentUser(null);
   };
-
-  useEffect(() => {
-    const checkDevice = () => {
-      const ua = (navigator.userAgent || navigator.vendor || window.opera || '').toLowerCase();
-      const mobileTabletRegex = /android|iphone|ipad|ipod|tablet|silk|kindle|mobile|blackberry|opera mini|iemobile|windows phone/i;
-      const isUaMatch = mobileTabletRegex.test(ua);
-      const isIPad = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-      const hasTouch = (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || ('ontouchstart' in window);
-
-      const isMobileOrTablet = isUaMatch || isIPad || (hasTouch && window.innerWidth <= 1366);
-      setIsAllowedDevice(isMobileOrTablet);
-    };
-
-    checkDevice();
-    window.addEventListener('resize', checkDevice);
-    return () => window.removeEventListener('resize', checkDevice);
-  }, []);
 
   // Load personal garage cleanly (Supabase Cloud + IndexedDB offline cache, isolated per user)
   const loadGarage = useCallback(async (user = currentUser) => {
@@ -318,14 +298,6 @@ export default function App() {
       </Suspense>
     );
   };
-
-  if (!isAllowedDevice && !devBypass) {
-    return (
-      <Suspense fallback={<ViewFallback />}>
-        <DesktopGate onBypass={() => setDevBypass(true)} />
-      </Suspense>
-    );
-  }
 
   return (
     <div className="min-h-[100dvh] bg-[var(--cl-canvas)] text-[var(--cl-text-primary)] flex flex-col justify-center items-center">

@@ -1,5 +1,5 @@
 // CarLog Service Worker - Offline PWA Cache & Background Push
-const CACHE_NAME = 'carlog-v2.0.2';
+const CACHE_NAME = 'carlog-v2.0.3';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -41,7 +41,7 @@ self.addEventListener('activate', (event) => {
 });
 
 function safeCachePut(request, response) {
-  if (!response || response.status !== 200 || response.type !== 'basic') return;
+  if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) return;
   const clone = response.clone();
   caches.open(CACHE_NAME)
     .then((cache) => cache.put(request, clone))
@@ -52,7 +52,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
+  const isModelRequest =
+    url.pathname.startsWith('/models/') ||
+    (url.pathname.endsWith('.glb') && (url.origin === self.location.origin || url.hostname.endsWith('.r2.dev') || url.pathname.includes('/models/')));
+
+  if (url.origin !== self.location.origin && !isModelRequest) return;
 
   // Navigation / index.html: Network-First to prevent stale HTML pointing to deleted JS chunk hashes
   if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
@@ -80,8 +84,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3D GLB Models: Cache-First
-  if (url.pathname.startsWith('/models/')) {
+  // 3D GLB Models (local or external R2 CDN): Cache-First
+  if (isModelRequest) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
