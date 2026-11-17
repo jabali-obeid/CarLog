@@ -44,7 +44,7 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, dailySaveStat
             limit: DAILY_SCAN_LIMIT
           });
         }
-      } catch {}
+      } catch { }
     }
     loadQuota();
     return () => { mounted = false; };
@@ -157,7 +157,7 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, dailySaveStat
         setCameraError('La cámara tomó una foto completamente oscura/negra. Toca "Cámara HD" para usar el sensor nativo de tu teléfono.');
         return;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     sound.playCameraClick();
     const rawBase64 = canvas.toDataURL('image/jpeg', 0.85);
@@ -294,13 +294,23 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
           accessToken = sessData?.session?.access_token || '';
         }
 
-        // 1. Try local or configured server endpoint first
+        // 1. Try local, configured, or production Netlify server endpoint (Capacitor-ready)
         let serverRespondedJson = false;
         try {
+          const isNative = Boolean(
+            window?.Capacitor?.isNativePlatform?.() ||
+            window.location.protocol === 'capacitor:' ||
+            (window.location.hostname === 'localhost' && !window.location.port)
+          );
+          const apiBase = (
+            import.meta.env.VITE_API_BASE_URL ||
+            (isNative ? 'https://carlogg.netlify.app' : '')
+          ).trim().replace(/\/+$/, '');
+
           const headers = { 'Content-Type': 'application/json' };
           if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-          const res = await fetch('/api/identify', {
+          const res = await fetch(`${apiBase}/api/identify`, {
             method: 'POST',
             headers,
             body: JSON.stringify({
@@ -444,24 +454,22 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
           <div className="flex items-center gap-1.5 flex-wrap">
             {dailySaveStats && (
               <span
-                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
-                  dailySaveStats.remaining === 0
-                    ? 'bg-red-600 border-red-600 text-white'
-                    : dailySaveStats.remaining <= 2
-                      ? 'bg-red-50 border-red-200 text-red-700'
-                      : 'cl-panel text-[#111318]'
-                }`}
+                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${dailySaveStats.remaining === 0
+                  ? 'bg-red-600 border-red-600 text-white'
+                  : dailySaveStats.remaining <= 2
+                    ? 'bg-red-50 border-red-200 text-red-700'
+                    : 'cl-panel text-[#111318]'
+                  }`}
               >
                 Guardados: {dailySaveStats.used}/{dailySaveStats.limit}
               </span>
             )}
             {quotaInfo ? (
               <span
-                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
-                  quotaInfo.remaining <= 3
-                    ? 'bg-red-50 border-red-200 text-red-700'
-                    : 'cl-panel text-[#111318]'
-                }`}
+                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${quotaInfo.remaining <= 3
+                  ? 'bg-red-50 border-red-200 text-red-700'
+                  : 'cl-panel text-[#111318]'
+                  }`}
               >
                 Escaneos: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
               </span>

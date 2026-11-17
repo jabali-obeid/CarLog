@@ -1,14 +1,12 @@
 {
-  "appId": "com.cardex.app",
-  "appName": "CarDex",
+  "appId": "com.carlog.app",
+  "appName": "CarLog",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
-    "androidScheme": "https",
-    "cleartext": true
+    "androidScheme": "https"
   },
   "android": {
     "allowMixedContent": true
   }
 }
-

@@ -1,4 +1,4 @@
-package com.cardex.app;
+package com.carlog.app;
 
 import com.getcapacitor.BridgeActivity;
 

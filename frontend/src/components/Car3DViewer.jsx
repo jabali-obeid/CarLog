@@ -647,7 +647,15 @@ export default function Car3DViewer({
 
     const resolveModelUrl = (url) => {
       if (!url || !url.startsWith('/models/')) return url;
-      const base = (import.meta.env.VITE_MODELS_BASE_URL || '').trim().replace(/\/+$/, '');
+      const isNative = Boolean(
+        window?.Capacitor?.isNativePlatform?.() ||
+        window.location.protocol === 'capacitor:' ||
+        (window.location.hostname === 'localhost' && !window.location.port)
+      );
+      const base = (
+        import.meta.env.VITE_MODELS_BASE_URL ||
+        (isNative ? 'https://carlogg.netlify.app' : '')
+      ).trim().replace(/\/+$/, '');
       if (!base) return url;
       return base.endsWith('/models')
         ? `${base}${url.slice('/models'.length)}`
