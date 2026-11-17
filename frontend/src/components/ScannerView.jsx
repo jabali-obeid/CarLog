@@ -19,8 +19,6 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, dailySaveStat
   const [toastMessage, setToastMessage] = useState(null);
   const [quotaInfo, setQuotaInfo] = useState(null);
 
-  const hasCustomKey = Boolean((localStorage.getItem('cardex_gemini_key') || '').trim());
-
   // Load user's remaining daily scan count on mount
   useEffect(() => {
     let mounted = true;
@@ -198,9 +196,9 @@ export default function ScannerView({ onSaveToGarage, savedCarIds, dailySaveStat
 
   // Client-side Direct AI fallback for static Netlify hosting
   const identifyDirectWithGemini = async (base64OrUrl) => {
-    const apiKey = (localStorage.getItem('cardex_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || '').trim();
+    const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || '').trim();
     if (!apiKey) {
-      throw new Error('Falta configurar tu Gemini API Key en Ajustes (o GEMINI_API_KEY en Netlify Functions).');
+      throw new Error('El servicio de escaneo IA no está configurado en el servidor todavía.');
     }
     const cleanBase64 = base64OrUrl.replace(/^data:image\/\w+;base64,/, '');
 
@@ -289,7 +287,6 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         triggerCelebration(presetData.rarity);
       } else {
         let carData = null;
-        const customKey = (localStorage.getItem('cardex_gemini_key') || '').trim();
         let accessToken = '';
         const supabase = getSupabase();
         if (supabase && isSupabaseConfigured()) {
@@ -308,8 +305,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             headers,
             body: JSON.stringify({
               imageBase64: base64OrUrl,
-              mimeType: 'image/jpeg',
-              ...(customKey ? { apiKey: customKey } : {})
+              mimeType: 'image/jpeg'
             })
           });
 
@@ -330,7 +326,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
           console.warn('Backend endpoint unavailable, falling back to direct AI...', serverErr);
         }
 
-        // 2. Fallback to direct Gemini only if server endpoint isn't active and user/env has a key
+        // 2. Fallback to direct Gemini only if server endpoint isn't active and env has a key
         if (!carData) {
           carData = await identifyDirectWithGemini(base64OrUrl);
         }
@@ -338,6 +334,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         const car = {
           ...carData,
           imageUrl: base64OrUrl,
+          captureSource: 'scanner',
           id: `car-${Date.now()}`
         };
         setIdentifiedCar(car);
@@ -416,10 +413,10 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
         <div
           role="status"
           aria-live="polite"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-[#121620]/95 text-white font-semibold text-xs shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 backdrop-blur-xl animate-fade-in max-w-[90vw]"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-white text-[#111318] font-semibold text-xs shadow-xl flex items-center gap-2.5 border border-red-200 backdrop-blur-xl animate-fade-in max-w-[90vw]"
         >
-          <span className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="w-5 h-5 rounded-full bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-red-600" />
           </span>
           <span className="truncate">{toastMessage}</span>
         </div>
@@ -427,19 +424,18 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
       {/* Main Optical Viewfinder / Capture Bay */}
       <div className="relative rounded-3xl cl-card cl-microgrid p-4 sm:p-5 overflow-hidden">
-        {/* Subtle Top Optical Accent */}
         <div className="absolute -top-12 -right-12 w-44 h-44 bg-red-600/8 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-red-600/12 border border-red-500/30 flex items-center justify-center text-red-400">
+            <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
               <Aperture className="w-4.5 h-4.5" />
             </div>
             <div>
-              <span className="text-[9px] font-telemetry uppercase tracking-widest text-[var(--cl-text-muted)] block leading-none">
-                OPTICAL ID // GEMINI VISION
+              <span className="text-[9px] font-telemetry uppercase tracking-widest text-red-600 block leading-none font-bold">
+                CAPTURA EN CALLE // IA
               </span>
-              <h2 className="font-display text-2xl font-extrabold text-white uppercase tracking-tight leading-none mt-1">
+              <h2 className="font-display text-2xl font-extrabold text-[#111318] uppercase tracking-tight leading-none mt-1">
                 Escáner de Calle
               </h2>
             </div>
@@ -450,48 +446,44 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
               <span
                 className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
                   dailySaveStats.remaining === 0
-                    ? 'bg-red-500/12 border-red-500/35 text-red-300'
+                    ? 'bg-red-600 border-red-600 text-white'
                     : dailySaveStats.remaining <= 2
-                      ? 'bg-amber-500/12 border-amber-500/35 text-amber-300'
-                      : 'cl-panel text-zinc-300'
+                      ? 'bg-red-50 border-red-200 text-red-700'
+                      : 'cl-panel text-[#111318]'
                 }`}
               >
                 Guardados: {dailySaveStats.used}/{dailySaveStats.limit}
               </span>
             )}
-            {hasCustomKey ? (
-              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-telemetry text-emerald-300 font-semibold uppercase">
-                API Propia · Ilimitado
-              </span>
-            ) : quotaInfo ? (
+            {quotaInfo ? (
               <span
                 className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
                   quotaInfo.remaining <= 3
-                    ? 'bg-red-500/12 border-red-500/35 text-red-300'
-                    : 'cl-panel text-zinc-300'
+                    ? 'bg-red-50 border-red-200 text-red-700'
+                    : 'cl-panel text-[#111318]'
                 }`}
               >
                 Escaneos: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
               </span>
             ) : (
-              <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-zinc-400 font-telemetry uppercase">
+              <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-slate-600 font-telemetry uppercase">
                 15 escaneos/día
               </span>
             )}
           </div>
         </div>
 
-        {/* Viewfinder Frame with Corner Brackets */}
-        <div className="relative w-full h-80 sm:h-96 rounded-2xl bg-[#06080c] border border-white/[0.11] flex flex-col items-center justify-center overflow-hidden shadow-inner">
+        {/* Viewfinder Frame */}
+        <div className="relative w-full h-80 sm:h-96 rounded-2xl bg-[#f8f9fb] border border-red-200/80 flex flex-col items-center justify-center overflow-hidden shadow-inner">
           {/* Precision Viewfinder Corner Brackets */}
-          <span className="pointer-events-none absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-white/30 z-20" />
-          <span className="pointer-events-none absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-white/30 z-20" />
-          <span className="pointer-events-none absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-white/30 z-20" />
-          <span className="pointer-events-none absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-white/30 z-20" />
+          <span className="pointer-events-none absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-red-500/50 z-20" />
+          <span className="pointer-events-none absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-red-500/50 z-20" />
+          <span className="pointer-events-none absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-red-500/50 z-20" />
+          <span className="pointer-events-none absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-red-500/50 z-20" />
 
           {/* Top Viewfinder HUD Status */}
-          <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-black/65 border border-white/10 backdrop-blur-md flex items-center gap-1.5 text-[9px] font-telemetry text-zinc-300 uppercase tracking-widest">
-            <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-red-500 animate-pulse' : analyzing ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+          <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-white/90 border border-black/[0.08] shadow-xs backdrop-blur-md flex items-center gap-1.5 text-[9px] font-telemetry text-[#111318] uppercase tracking-widest font-semibold">
+            <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-red-600 animate-pulse' : analyzing ? 'bg-amber-500 animate-pulse' : 'bg-red-600'}`} />
             <span>{cameraActive ? 'VISOR ACTIVO' : analyzing ? 'ANALIZANDO' : 'LISTO PARA CAPTURA'}</span>
           </div>
 
@@ -554,15 +546,15 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             </div>
           ) : (
             <div className="text-center px-5 py-6 space-y-4 max-w-md relative z-10">
-              <div className="w-14 h-14 rounded-2xl cl-pill flex items-center justify-center mx-auto text-zinc-200">
-                <Camera className="w-6 h-6 text-red-400" />
+              <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-xs">
+                <Camera className="w-6 h-6" />
               </div>
 
               <div className="space-y-1">
-                <h3 className="font-display text-2xl font-extrabold uppercase text-white tracking-tight">
+                <h3 className="font-display text-2xl font-extrabold uppercase text-[#111318] tracking-tight">
                   Apunta al vehículo
                 </h3>
-                <p className="text-xs text-[var(--cl-text-secondary)] leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   Detecta marca, modelo, especificaciones técnicas y categoría de colección al instante.
                 </p>
               </div>
@@ -570,27 +562,27 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 pt-1">
                 <button
                   onClick={() => nativeCameraInputRef.current?.click()}
-                  className="min-h-[42px] px-5 py-2.5 rounded-xl font-bold text-xs bg-white hover:bg-zinc-200 text-[#08090c] shadow-[0_8px_20px_rgba(255,255,255,0.12)] flex items-center justify-center gap-2 transition active:scale-[0.98]"
+                  className="min-h-[42px] px-5 py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white shadow-[0_8px_20px_rgba(220,38,38,0.28)] flex items-center justify-center gap-2 transition active:scale-[0.98]"
                   title="Abre la cámara oficial de tu teléfono (ideal para fotos de noche o en la calle)"
                 >
-                  <Camera className="w-4 h-4 text-red-600" />
+                  <Camera className="w-4 h-4 text-white" />
                   <span>Cámara HD</span>
                 </button>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={startCamera}
-                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs cl-pill hover:bg-[#232838] text-zinc-200 flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs bg-white border border-black/[0.1] hover:bg-red-50 text-[#111318] flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
                   >
-                    <Aperture className="w-3.5 h-3.5 text-zinc-400" />
+                    <Aperture className="w-3.5 h-3.5 text-red-600" />
                     <span>Visor Live</span>
                   </button>
 
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs cl-pill hover:bg-[#232838] text-zinc-200 flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                    className="min-h-[42px] px-3.5 py-2.5 rounded-xl font-semibold text-xs bg-white border border-black/[0.1] hover:bg-red-50 text-[#111318] flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
                   >
-                    <Upload className="w-3.5 h-3.5 text-zinc-400" />
+                    <Upload className="w-3.5 h-3.5 text-red-600" />
                     <span>Galería</span>
                   </button>
                 </div>
@@ -599,9 +591,9 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
               {cameraError && (
                 <div
                   role="alert"
-                  className="p-3 rounded-xl bg-red-950/70 border border-red-500/45 text-xs text-red-200 text-left flex items-start gap-2.5"
+                  className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 text-left flex items-start gap-2.5"
                 >
-                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                   <span className="leading-relaxed">{cameraError}</span>
                 </div>
               )}
@@ -630,14 +622,14 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
         {/* Retake / Change Photo Controls */}
         {imagePreview && !analyzing && (
-          <div className="flex items-center justify-between mt-3.5 pt-3 border-t border-white/[0.08]">
+          <div className="flex items-center justify-between mt-3.5 pt-3 border-t border-black/[0.08]">
             <button
               onClick={() => {
                 setImagePreview(null);
                 setIdentifiedCar(null);
                 stopCamera();
               }}
-              className="text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-white/[0.05] active:scale-95"
+              className="text-xs font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-red-50 active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Escanear otro</span>
@@ -645,7 +637,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-semibold text-zinc-300 hover:text-white flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-white/[0.05] active:scale-95"
+              className="text-xs font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-red-50 active:scale-95"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Subir otra foto</span>
@@ -658,8 +650,8 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       {identifiedCar && (
         <div className="mt-4 animate-fade-in">
           <div className="text-center mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/12 border border-emerald-500/35 text-emerald-300 font-telemetry text-[11px] font-bold uppercase tracking-wider">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 font-telemetry text-[11px] font-bold uppercase tracking-wider">
+              <CheckCircle2 className="w-3.5 h-3.5 text-red-600" />
               Vehículo Identificado
             </span>
           </div>

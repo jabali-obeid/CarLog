@@ -103,15 +103,14 @@ export async function handler(event) {
   }
 
   try {
-    const { imageBase64, mimeType = 'image/jpeg', apiKey } = JSON.parse(event.body || '{}');
-    const customApiKey = (apiKey || '').trim();
-    const effectiveKey = customApiKey || GEMINI_API_KEY;
+    const { imageBase64 } = JSON.parse(event.body || '{}');
+    const effectiveKey = GEMINI_API_KEY;
 
     if (!effectiveKey) {
       return {
         statusCode: 500,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Falta configurar GEMINI_API_KEY en Netlify o enviarla desde Ajustes.' })
+        body: JSON.stringify({ error: 'Falta configurar GEMINI_API_KEY en Netlify.' })
       };
     }
 
@@ -123,23 +122,20 @@ export async function handler(event) {
       };
     }
 
-    // Enforce 15/day quota only when using the app owner's GEMINI_API_KEY
-    let quotaInfo = null;
-    if (!customApiKey) {
-      const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
-      const quotaCheck = await checkAndConsumeDailyQuota(authHeader);
-      if (!quotaCheck.allowed) {
-        return {
-          statusCode: quotaCheck.statusCode || 429,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({
-            error: quotaCheck.error,
-            quota: quotaCheck.quota || null
-          })
-        };
-      }
-      quotaInfo = quotaCheck.quota;
+    // Enforce 15/day AI scan quota
+    const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
+    const quotaCheck = await checkAndConsumeDailyQuota(authHeader);
+    if (!quotaCheck.allowed) {
+      return {
+        statusCode: quotaCheck.statusCode || 429,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          error: quotaCheck.error,
+          quota: quotaCheck.quota || null
+        })
+      };
     }
+    const quotaInfo = quotaCheck.quota;
 
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 

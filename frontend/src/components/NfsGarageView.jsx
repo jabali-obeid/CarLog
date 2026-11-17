@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, ChevronRight, Zap, Gauge, Award,
-  Trash2, ShieldCheck, Sparkles, Sliders, Box, Image, BookOpen, Warehouse, Check,
+  Trash2, ShieldCheck, Sparkles, Sliders, Box, Image, BookOpen, Check,
   Sun, Moon, Cpu
 } from 'lucide-react';
 import { RARITY_CONFIG } from '../utils/demoData';
@@ -26,7 +26,6 @@ export default function NfsGarageView({
   initialCarId = null,
   studioTheme = 'light',
   onToggleStudioTheme,
-  onSaveToGarage,
   savedIds = new Set()
 }) {
   const [selectedIndex, setSelectedIndex] = useState(() => {
@@ -252,23 +251,12 @@ export default function NfsGarageView({
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
-          ) : (
-            onSaveToGarage && (
-              <button
-                type="button"
-                disabled={isSavedCurrent}
-                onClick={() => onSaveToGarage(currentCar)}
-                className={`h-8 px-3 rounded-full text-[11px] font-semibold transition flex items-center gap-1.5 shrink-0 ${
-                  isSavedCurrent
-                    ? 'bg-emerald-600/12 text-emerald-800 border border-emerald-600/25 cursor-default'
-                    : 'bg-[#111318] text-white hover:bg-zinc-800 active:scale-95'
-                }`}
-              >
-                {isSavedCurrent ? <Check className="w-3.5 h-3.5" /> : <Warehouse className="w-3.5 h-3.5" />}
-                <span>{isSavedCurrent ? 'Guardado' : 'Guardar'}</span>
-              </button>
-            )
-          )}
+          ) : isSavedCurrent ? (
+            <span className="h-8 px-3 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shrink-0 bg-red-50 text-red-700 border border-red-200">
+              <Check className="w-3.5 h-3.5" />
+              <span>En tu Garage</span>
+            </span>
+          ) : null}
         </div>
 
         {/* Borderless White Studio 3D Stage (Zero Platform) */}

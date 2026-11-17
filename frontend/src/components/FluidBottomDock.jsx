@@ -103,10 +103,10 @@ export default function FluidBottomDock({
           <div
             key={activeTab}
             className={`cl-orb-pop w-11 h-11 rounded-full transition-colors duration-300 ${
-              isLightView
-                ? 'bg-white border border-slate-900/[0.07] shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
-                : isScannerActive
-                  ? 'bg-red-600 border border-red-400/45 shadow-[0_10px_26px_rgba(220,38,38,0.45)]'
+              isScannerActive
+                ? 'bg-red-600 border border-red-400/50 shadow-[0_10px_24px_rgba(220,38,38,0.4)]'
+                : isLightView
+                  ? 'bg-white border border-red-600/20 shadow-[0_10px_24px_rgba(220,38,38,0.16)]'
                   : 'bg-[#1a202e] border border-white/[0.14] shadow-[0_10px_24px_rgba(0,0,0,0.68)]'
             }`}
           />
@@ -127,14 +127,12 @@ export default function FluidBottomDock({
             if (isLightView) {
               iconTone = isActive
                 ? item.primary
-                  ? 'text-red-600'
-                  : 'text-[#111318]'
-                : 'text-slate-400 group-hover:text-slate-600';
+                  ? 'text-white'
+                  : 'text-red-600'
+                : 'text-slate-400 group-hover:text-red-500';
               labelTone = isActive
-                ? item.primary
-                  ? 'text-red-600 font-bold'
-                  : 'text-[#111318] font-bold'
-                : 'text-slate-400 font-medium group-hover:text-slate-600';
+                ? 'text-red-600 font-bold'
+                : 'text-slate-500 font-medium group-hover:text-red-600';
             } else {
               iconTone = isActive
                 ? 'text-white'

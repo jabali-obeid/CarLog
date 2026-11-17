@@ -33,14 +33,13 @@ const ScannerView = lazyWithRetry(() => import('./components/ScannerView'));
 const NfsGarageView = lazyWithRetry(() => import('./components/NfsGarageView'));
 const BrandBookshelf = lazyWithRetry(() => import('./components/BrandBookshelf'));
 const RadarView = lazyWithRetry(() => import('./components/RadarView'));
-const SettingsModal = lazyWithRetry(() => import('./components/SettingsModal'));
 const AuthModal = lazyWithRetry(() => import('./components/AuthModal'));
 const ProfileView = lazyWithRetry(() => import('./components/ProfileView'));
 
 function ViewFallback() {
   return (
     <div className="py-16 flex flex-col items-center justify-center gap-3 text-[var(--cl-text-secondary)] font-telemetry text-[11px] uppercase tracking-wider">
-      <div className="w-6 h-6 border-2 border-zinc-700 border-t-red-500 rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />
       <span>Cargando módulo...</span>
     </div>
   );
@@ -55,12 +54,8 @@ export default function App() {
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [target3DCarId, setTarget3DCarId] = useState(null);
   const [custom3DCar, setCustom3DCar] = useState(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsVersion, setSettingsVersion] = useState(0);
   const [authOpen, setAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [radarSelectedPreset, setRadarSelectedPreset] = useState(null);
-  const [garageStudioTheme, setGarageStudioTheme] = useState('light');
   const [saveNotice, setSaveNotice] = useState(null);
 
   // Resolve initial Supabase/local session and subscribe to auth updates
@@ -98,7 +93,7 @@ export default function App() {
       active = false;
       subscription?.unsubscribe?.();
     };
-  }, [settingsVersion]);
+  }, []);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -114,7 +109,7 @@ export default function App() {
 
   useEffect(() => {
     loadGarage(currentUser);
-  }, [currentUser, settingsVersion, loadGarage]);
+  }, [currentUser, loadGarage]);
 
   const ensureShowroomCatalog = useCallback(async () => {
     if (showroomCars.length > 0) return showroomCars;
@@ -179,6 +174,12 @@ export default function App() {
   };
 
   const handleSaveToGarage = async (car) => {
+    if (car?.captureSource !== 'scanner') {
+      const msg = 'Solo podés sumar autos escaneándolos en la calle.';
+      showSaveNotice(msg, 'warn');
+      return { saved: false, reason: 'scanner_only', error: msg, updatedList: garage };
+    }
+
     const newCar = {
       ...car,
       id: car.id || `car-${Date.now()}`,
@@ -210,8 +211,7 @@ export default function App() {
     setGarage(updatedList);
   };
 
-  const handleSpotFromRadar = (spot) => {
-    setRadarSelectedPreset(spot);
+  const handleSpotFromRadar = () => {
     setActiveTab('scanner');
   };
 
@@ -270,7 +270,6 @@ export default function App() {
           <ShowroomGallery
             cars={showroomCars}
             savedIds={savedCarIds}
-            onSaveToGarage={handleSaveToGarage}
             onOpenIn3D={handleOpenCarIn3D}
             onBackToBookshelf={handleToggleShowroom}
             title="Catálogo 3D"
@@ -290,7 +289,7 @@ export default function App() {
             }}
             showingShowroom={showroomMode}
             onToggleShowroom={handleToggleShowroom}
-            showroomCount={showroomCars.length || 60}
+            showroomCount={showroomCars.length || 111}
           />
         </Suspense>
       );
@@ -319,9 +318,7 @@ export default function App() {
           }}
           onDeleteCar={!showroomMode ? handleDeleteFromGarage : undefined}
           onOpenScanner={() => setActiveTab('scanner')}
-          studioTheme={garageStudioTheme}
-          onToggleStudioTheme={() => setGarageStudioTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
-          onSaveToGarage={handleSaveToGarage}
+          studioTheme="light"
           savedIds={savedCarIds}
         />
       </Suspense>
@@ -334,7 +331,7 @@ export default function App() {
         <div
           role="alert"
           aria-live="assertive"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2.5 rounded-2xl bg-[#181214]/95 text-amber-200 font-semibold text-xs shadow-2xl border border-amber-500/40 backdrop-blur-xl max-w-[92vw] text-center animate-fade-in"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2.5 rounded-2xl bg-red-600 text-white font-semibold text-xs shadow-2xl border border-red-400/50 backdrop-blur-xl max-w-[92vw] text-center animate-fade-in"
         >
           {saveNotice.message}
         </div>
@@ -350,16 +347,11 @@ export default function App() {
           }
         }}
         garage={garage}
-        onSaveToGarage={handleSaveToGarage}
         savedIds={savedCarIds}
-        onOpenSettings={() => setSettingsOpen(true)}
         user={currentUser}
         onOpenAuth={() => setAuthOpen(true)}
         onLogout={handleLogout}
-        showroomCars={showroomCars}
-        showroomLoading={showroomLoading}
         onOpenCarIn3D={handleOpenCarIn3D}
-        isGarageShowroom={(showroomMode && selectedBrand === null) || (selectedBrand !== null && garageStudioTheme === 'light')}
         renderGarageContent={renderGarageContent}
         renderScannerContent={() => (
           <Suspense fallback={<ViewFallback />}>
@@ -368,7 +360,6 @@ export default function App() {
               savedCarIds={savedCarIds}
               dailySaveStats={dailySaveStats}
               onBroadcastToRadar={() => setActiveTab('radar')}
-              initialPreset={radarSelectedPreset}
             />
           </Suspense>
         )}
@@ -395,16 +386,6 @@ export default function App() {
             isOpen={authOpen}
             onClose={() => setAuthOpen(false)}
             onAuthSuccess={handleAuthSuccess}
-          />
-        </Suspense>
-      )}
-
-      {settingsOpen && (
-        <Suspense fallback={null}>
-          <SettingsModal
-            isOpen={settingsOpen}
-            onClose={() => setSettingsOpen(false)}
-            onSettingsSaved={() => setSettingsVersion(v => v + 1)}
           />
         </Suspense>
       )}

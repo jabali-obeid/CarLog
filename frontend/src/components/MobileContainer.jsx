@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Settings, Camera, Radio, Check,
+  Camera, Radio, Check,
   BookOpen, Smartphone, Flame, User, LogOut
 } from 'lucide-react';
 import WeeklyFindsFeed from './WeeklyFindsFeed';
@@ -10,14 +10,11 @@ export default function MobileContainer({
   activeTab,
   onTabChange,
   garage = [],
-  onSaveToGarage,
   savedIds = new Set(),
-  onOpenSettings,
   user,
   onOpenAuth,
   onLogout,
   onOpenCarIn3D,
-  isGarageShowroom = false,
   renderGarageContent,
   renderScannerContent,
   renderRadarContent,
@@ -55,34 +52,6 @@ export default function MobileContainer({
     }
   };
 
-  const handleCapture = async (targetCar) => {
-    if (!targetCar) return;
-    const modelName = targetCar.model || targetCar.name || 'Modelo';
-    const res = await onSaveToGarage({
-      id: targetCar.id,
-      brand: targetCar.brand,
-      model: modelName,
-      year: targetCar.year,
-      rarity: targetCar.rarity,
-      hp: targetCar.hp,
-      zeroToHundred: parseFloat(targetCar.zeroToHundred) || 0,
-      topSpeed: parseInt(targetCar.topSpeed, 10) || 0,
-      engine: targetCar.engine,
-      color: targetCar.color,
-      imageUrl: targetCar.imageUrl || targetCar.image,
-      funFact: targetCar.funFact || targetCar.description
-    });
-    if (res?.saved === false) {
-      setToast(res.error || `${targetCar.brand} ${modelName} ya está en tu Garage`);
-      setTimeout(() => setToast(null), 3400);
-      return;
-    }
-    setToast(`${targetCar.brand} ${modelName} guardado en tu Garage`);
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const isLightView = activeTab === 'cardex' || (activeTab === 'garage' && isGarageShowroom);
-
   const navItems = [
     { id: 'cardex', label: 'HOT', icon: Flame },
     { id: 'garage', label: 'Garage', icon: BookOpen, badge: garage.length > 0 ? garage.length : null },
@@ -92,114 +61,63 @@ export default function MobileContainer({
   ];
 
   return (
-    <div className="relative flex flex-col items-center justify-center p-0 sm:py-3 sm:px-3 select-none min-h-[100dvh] w-full bg-[var(--cl-canvas)] text-[var(--cl-text-primary)]">
+    <div className="relative flex flex-col items-center justify-center p-0 sm:py-3 sm:px-3 select-none min-h-[100dvh] w-full bg-[#eef0f3] text-[#111318]">
       {/* Toast popup */}
       {toast && (
         <div
           role="status"
           aria-live="polite"
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-[#12151e]/95 text-[var(--cl-text-primary)] font-medium text-xs shadow-2xl border border-white/15 backdrop-blur-xl flex items-center gap-2 animate-fade-in max-w-[90vw]"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-white text-[#111318] font-medium text-xs shadow-xl border border-red-200 flex items-center gap-2 animate-fade-in max-w-[90vw]"
         >
-          <span className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-            <Check className="w-3 h-3 text-emerald-400" />
+          <span className="w-5 h-5 rounded-full bg-red-50 border border-red-200 flex items-center justify-center shrink-0">
+            <Check className="w-3 h-3 text-red-600" />
           </span>
           <span className="truncate">{toast}</span>
         </div>
       )}
 
-      {/* Main App Shell: Edge-to-edge on mobile, machined cockpit frame on tablet/desktop */}
-      <div
-        className={`relative w-full sm:max-w-md md:max-w-lg h-[100dvh] sm:h-[min(94dvh,920px)] sm:rounded-[34px] shadow-[0_24px_60px_rgba(0,0,0,0.88)] border-0 sm:border sm:border-white/[0.11] overflow-hidden flex flex-col justify-between transition-colors duration-300 ${
-          isLightView ? 'bg-[#f4f5f7] text-[#111318]' : 'bg-[var(--cl-surface)]'
-        }`}
-      >
-        {!isLightView && (
-          <>
-            {/* Top Motorsport Hairline Accent */}
-            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-red-600/80 to-transparent z-40 pointer-events-none" />
-            {/* Restrained Overhead Showroom Glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-28 bg-gradient-to-b from-white/[0.035] to-transparent blur-2xl pointer-events-none" />
-          </>
-        )}
+      {/* Main White & Red App Shell */}
+      <div className="relative w-full sm:max-w-md md:max-w-lg h-[100dvh] sm:h-[min(94dvh,920px)] sm:rounded-[34px] shadow-[0_24px_60px_rgba(15,23,42,0.14)] border-0 sm:border sm:border-black/[0.08] overflow-hidden flex flex-col justify-between bg-[#f4f5f7] text-[#111318]">
+        {/* Top Red Motorsport Hairline Accent */}
+        <div className="h-[3px] w-full bg-gradient-to-r from-red-700 via-red-600 to-rose-500 shrink-0 z-40" />
 
-        {/* Adaptive Top App Bar (Studio White in Showroom / Dark Pit-Wall in Workshop) */}
-        <header
-          className={`relative z-30 pt-[max(0.75rem,var(--sat))] pb-2.5 px-4 sm:px-5 flex items-center justify-between border-b backdrop-blur-xl transition-colors duration-300 ${
-            isLightView
-              ? 'border-slate-200/80 bg-white/92 text-[#111318]'
-              : 'border-white/[0.07] bg-[#0b0d12]/88 text-white'
-          }`}
-        >
+        {/* Clean White Top App Bar with Official Logo */}
+        <header className="relative z-30 pt-[max(0.75rem,var(--sat))] pb-2.5 px-4 sm:px-5 flex items-center justify-between border-b border-black/[0.07] bg-white/95 backdrop-blur-xl text-[#111318]">
           <div className="flex items-center gap-2.5">
-            <div
-              className={`relative w-8 h-8 rounded-xl flex items-center justify-center ${
-                isLightView
-                  ? 'bg-[#111318] text-white shadow-sm'
-                  : 'bg-gradient-to-b from-white to-zinc-200 text-[#08090c] shadow-[inset_0_-1px_0_rgba(0,0,0,0.2),0_4px_12px_rgba(0,0,0,0.5)]'
-              }`}
-            >
-              <span className="font-display font-extrabold text-sm tracking-tighter leading-none">CL</span>
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ${
-                  isLightView ? 'bg-emerald-500 ring-white' : 'bg-red-600 ring-[#0b0d12]'
-                }`}
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm border border-black/[0.08] bg-black shrink-0">
+              <img
+                src="/logo.png"
+                alt="CarLog"
+                className="w-full h-full object-cover"
               />
             </div>
             <div>
               <div className="flex items-center gap-1.5 leading-none">
-                <span
-                  className={`font-display font-extrabold text-lg tracking-wide uppercase ${
-                    isLightView ? 'text-[#111318]' : 'text-white'
-                  }`}
-                >
+                <span className="font-display font-extrabold text-lg tracking-wide uppercase text-[#111318]">
                   CarLog
                 </span>
-                <span
-                  className={`text-[9px] font-telemetry uppercase tracking-widest px-1.5 py-0.5 rounded font-semibold border ${
-                    isLightView
-                      ? 'bg-emerald-500/12 text-emerald-700 border-emerald-500/30'
-                      : 'bg-red-600/12 text-red-400 border-red-500/25'
-                  }`}
-                >
-                  {isLightView ? 'Studio' : 'OS'}
+                <span className="text-[9px] font-telemetry uppercase tracking-widest px-1.5 py-0.5 rounded font-bold bg-red-50 text-red-600 border border-red-200">
+                  STREET
                 </span>
               </div>
-              <span
-                className={`text-[10px] font-telemetry uppercase tracking-wider block mt-0.5 ${
-                  isLightView ? 'text-slate-500' : 'text-[var(--cl-text-muted)]'
-                }`}
-              >
-                Showroom · Telemetría 3D
+              <span className="text-[10px] font-telemetry uppercase tracking-wider block mt-0.5 text-slate-500">
+                Spotting · Garaje 3D
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
             {user ? (
-              <div
-                className={`h-8 flex items-center gap-1.5 pl-2.5 pr-1 rounded-xl border ${
-                  isLightView
-                    ? 'bg-slate-100 border-slate-200 text-slate-800'
-                    : 'cl-pill'
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span
-                  className={`text-[11px] font-semibold max-w-[78px] truncate ${
-                    isLightView ? 'text-slate-800' : 'text-zinc-200'
-                  }`}
-                >
+              <div className="h-8 flex items-center gap-1.5 pl-2.5 pr-1 rounded-xl border bg-red-50/70 border-red-200/80 text-[#111318]">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                <span className="text-[11px] font-semibold max-w-[82px] truncate text-[#111318]">
                   {user.username}
                 </span>
                 <button
                   onClick={onLogout}
                   title="Cerrar sesión"
                   aria-label="Cerrar sesión"
-                  className={`p-1 rounded-lg transition active:scale-95 ${
-                    isLightView
-                      ? 'text-slate-500 hover:text-red-600 hover:bg-slate-200/70'
-                      : 'text-zinc-400 hover:text-red-400 hover:bg-white/[0.06]'
-                  }`}
+                  className="p-1 rounded-lg transition active:scale-95 text-slate-500 hover:text-red-600 hover:bg-red-100/70"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -207,11 +125,7 @@ export default function MobileContainer({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className={`h-8 px-3 rounded-xl font-bold text-[11px] transition active:scale-[0.97] shadow-sm flex items-center gap-1.5 ${
-                  isLightView
-                    ? 'bg-[#111318] text-white hover:bg-slate-800'
-                    : 'bg-white text-[#08090c] hover:bg-zinc-200'
-                }`}
+                className="h-8 px-3.5 rounded-xl font-bold text-[11px] transition active:scale-[0.97] shadow-sm flex items-center gap-1.5 bg-red-600 text-white hover:bg-red-700"
               >
                 <User className="w-3.5 h-3.5" />
                 <span>Entrar</span>
@@ -222,40 +136,22 @@ export default function MobileContainer({
               <button
                 onClick={handleInstallApp}
                 title="Instalar App en Celular"
-                className={`h-8 px-2.5 rounded-xl text-[11px] font-medium flex items-center gap-1.5 transition active:scale-[0.97] border ${
-                  isLightView
-                    ? 'bg-slate-100 hover:bg-slate-200/80 text-slate-700 border-slate-200'
-                    : 'cl-pill hover:bg-[#1f2432] text-zinc-300 border-transparent'
-                }`}
+                className="h-8 px-2.5 rounded-xl text-[11px] font-medium flex items-center gap-1.5 transition active:scale-[0.97] border bg-white hover:bg-slate-50 text-slate-700 border-black/[0.09]"
               >
-                <Smartphone className={`w-3.5 h-3.5 ${isLightView ? 'text-slate-500' : 'text-zinc-400'}`} />
+                <Smartphone className="w-3.5 h-3.5 text-red-600" />
                 <span className="hidden xs:inline sm:inline">Instalar</span>
               </button>
             )}
-
-            <button
-              onClick={onOpenSettings}
-              title="Ajustes de API"
-              aria-label="Ajustes de API"
-              className={`w-8 h-8 rounded-xl flex items-center justify-center transition active:scale-[0.97] border ${
-                isLightView
-                  ? 'bg-slate-100 hover:bg-slate-200/80 text-slate-600 hover:text-slate-900 border-slate-200'
-                  : 'cl-pill hover:bg-[#1f2432] text-zinc-400 hover:text-white border-transparent'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-            </button>
           </div>
         </header>
 
-        {/* Dynamic App Tab Body */}
-        <main className="relative z-20 flex-1 flex flex-col overflow-hidden">
+        {/* Dynamic App Tab Body (Unified White & Red Palette) */}
+        <main className="relative z-20 flex-1 flex flex-col overflow-hidden bg-[#f4f5f7]">
           {/* TAB 1: HOT WEEKLY REAL FINDS */}
           {activeTab === 'cardex' && (
             <div className="flex-1 overflow-y-auto pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               <WeeklyFindsFeed
                 savedIds={savedIds}
-                onSaveToGarage={handleCapture}
                 onOpenIn3D={onOpenCarIn3D}
                 onOpenScanner={() => onTabChange('scanner')}
                 onOpenRadar={() => onTabChange('radar')}
@@ -263,47 +159,41 @@ export default function MobileContainer({
             </div>
           )}
 
-          {/* TAB 2: GARAGE (Bookshelf / Light 3D Catalog / 3D Workshop) */}
+          {/* TAB 2: GARAGE (Bookshelf / Read-only 3D Catalog / 3D Studio) */}
           {activeTab === 'garage' && (
-            <div
-              className={`flex-1 overflow-y-auto scrollbar-none ${
-                isGarageShowroom
-                  ? 'p-0 pb-8 bg-[#f4f5f7] text-[#111318]'
-                  : 'p-3 sm:p-4 pb-8 text-white'
-              }`}
-            >
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               {renderGarageContent()}
             </div>
           )}
 
           {/* TAB 3: SCANNER */}
           {activeTab === 'scanner' && (
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 text-white scrollbar-none">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               {renderScannerContent()}
             </div>
           )}
 
           {/* TAB 4: RADAR */}
           {activeTab === 'radar' && (
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 text-white scrollbar-none">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               {renderRadarContent()}
             </div>
           )}
 
           {/* TAB 5: PROFILE */}
           {activeTab === 'profile' && (
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 text-white scrollbar-none">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               {renderProfileContent ? renderProfileContent() : null}
             </div>
           )}
         </main>
 
-        {/* Fluid Concave-Notch Bottom Dock */}
+        {/* Fluid Concave-Notch Bottom Dock (Always Crisp White & Red) */}
         <FluidBottomDock
           items={navItems}
           activeTab={activeTab}
           onTabChange={onTabChange}
-          isLightView={isLightView}
+          isLightView={true}
         />
       </div>
     </div>

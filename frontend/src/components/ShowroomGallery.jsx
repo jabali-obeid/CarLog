@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Search, SlidersHorizontal, ArrowUpRight, LayoutGrid, Rows3,
-  Check, Warehouse, X, ArrowUpDown, BookOpen, Box
+  Check, X, ArrowUpDown, BookOpen, Box
 } from 'lucide-react';
 import { isCarInSavedSet } from '../utils/auth';
 
@@ -38,7 +38,7 @@ function getNumeric(val, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOpenIn3D, onSaveToGarage }) {
+function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOpenIn3D }) {
   const [cutoutFailed, setCutoutFailed] = useState(false);
 
   const modelName = car.model || car.name || '';
@@ -179,41 +179,26 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
           </div>
         </div>
 
-        {/* Save / 3D Action Row */}
-        {onSaveToGarage && (
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-black/[0.06]">
-            <button
-              type="button"
-              disabled={isSaved}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSaveToGarage(car);
-              }}
-              className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1.5 ${
-                isSaved
-                  ? 'bg-emerald-600/12 text-emerald-800 border border-emerald-700/20 cursor-default'
-                  : 'bg-[#111318] text-white hover:bg-[#1f2430] active:scale-[0.98]'
-              }`}
-            >
-              {isSaved ? <Check className="w-3 h-3" /> : <Warehouse className="w-3 h-3" />}
-              <span>{isSaved ? 'En Garage' : 'Guardar'}</span>
-            </button>
-
-            {!isTwoCol && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onOpenIn3D) onOpenIn3D(car);
-                }}
-                className="py-1.5 px-3 rounded-xl text-[11px] font-semibold bg-white text-[#111318] border border-black/[0.1] hover:bg-zinc-100 transition flex items-center gap-1.5 active:scale-[0.98]"
-              >
-                <Box className="w-3 h-3" />
-                <span>Ver 3D</span>
-              </button>
-            )}
-          </div>
-        )}
+        {/* Read-only 3D Catalog Action Row (Saving only allowed by scanning in street) */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t border-black/[0.06]">
+          {isSaved && (
+            <span className="py-1.5 px-2.5 rounded-xl text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">
+              <Check className="w-3 h-3" />
+              <span>En tu Garage</span>
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenIn3D) onOpenIn3D(car);
+            }}
+            className="flex-1 py-1.5 px-3 rounded-xl text-[11px] font-semibold bg-red-600 hover:bg-red-700 text-white transition flex items-center justify-center gap-1.5 active:scale-[0.98]"
+          >
+            <Box className="w-3 h-3" />
+            <span>Ver 3D</span>
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -222,7 +207,6 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
 export default function ShowroomGallery({
   cars = [],
   savedIds = new Set(),
-  onSaveToGarage,
   onOpenIn3D,
   onBackToBookshelf,
   title = 'En Showroom',
@@ -398,7 +382,7 @@ export default function ShowroomGallery({
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span>Filtros</span>
           {activeFilterCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-emerald-400 text-[#081c15] font-telemetry text-[10px] font-bold">
+            <span className="px-1.5 py-0.2 rounded-full bg-red-600 text-white font-telemetry text-[10px] font-bold">
               {activeFilterCount}
             </span>
           )}
@@ -580,7 +564,6 @@ export default function ShowroomGallery({
                 layout={layout}
                 onSelectFeatured={setFeaturedId}
                 onOpenIn3D={onOpenIn3D}
-                onSaveToGarage={onSaveToGarage}
               />
             );
           })}

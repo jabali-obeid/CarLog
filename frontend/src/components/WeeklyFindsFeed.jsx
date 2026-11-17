@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Box, Check, Plus, MapPin, UserCheck, Flame, Sparkles, Camera, Radio } from 'lucide-react';
+import { Search, Box, Check, MapPin, UserCheck, Flame, Sparkles, Camera, Radio } from 'lucide-react';
 import { getCarRarityScore, getScoreTheme } from '../utils/carScore';
 import { isCarInSavedSet, getCarIdentityKey } from '../utils/auth';
 import { fetchWeeklyRealFinds } from '../utils/radarService';
@@ -10,7 +10,7 @@ const FILTER_TABS = [
   { id: 'classics', label: 'Clásicos' }
 ];
 
-function BubbleFindCard({ car, rank, isSaved, onOpenIn3D, onSaveToGarage }) {
+function BubbleFindCard({ car, rank, isSaved, onOpenIn3D, onOpenScanner }) {
   const [imgFailed, setImgFailed] = useState(false);
   const modelName = car.model || car.name || 'Modelo';
   const score = car._score;
@@ -114,19 +114,21 @@ function BubbleFindCard({ car, rank, isSaved, onOpenIn3D, onSaveToGarage }) {
             <span>Ver en 3D</span>
           </button>
 
-          <button
-            type="button"
-            disabled={isSaved}
-            onClick={() => onSaveToGarage && onSaveToGarage(car)}
-            className={`flex-[1.35] py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm ${
-              isSaved
-                ? 'bg-emerald-400/25 text-emerald-100 border border-emerald-300/40 cursor-default'
-                : 'bg-white text-[#111318] hover:bg-zinc-100 active:scale-[0.98]'
-            }`}
-          >
-            {isSaved ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-            <span>{isSaved ? 'En tu Garage' : 'Agregar al Garage'}</span>
-          </button>
+          {isSaved ? (
+            <div className="flex-[1.35] py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-white/20 text-white border border-white/30">
+              <Check className="w-3.5 h-3.5" />
+              <span>Ya en tu Garage</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onOpenScanner && onOpenScanner()}
+              className="flex-[1.35] py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm bg-white text-[#111318] hover:bg-zinc-100 active:scale-[0.98]"
+            >
+              <Camera className="w-3.5 h-3.5 text-red-600" />
+              <span>Escanear en Calle</span>
+            </button>
+          )}
         </div>
       </div>
     </article>
@@ -135,7 +137,6 @@ function BubbleFindCard({ car, rank, isSaved, onOpenIn3D, onSaveToGarage }) {
 
 export default function WeeklyFindsFeed({
   savedIds = new Set(),
-  onSaveToGarage,
   onOpenIn3D,
   onOpenScanner,
   onOpenRadar
@@ -327,7 +328,7 @@ export default function WeeklyFindsFeed({
               rank={index + 1}
               isSaved={isCarInSavedSet(car, savedIds)}
               onOpenIn3D={onOpenIn3D}
-              onSaveToGarage={onSaveToGarage}
+              onOpenScanner={onOpenScanner}
             />
           ))}
         </div>

@@ -368,26 +368,26 @@ export default function BrandBookshelf({
   return (
     <div className="space-y-4 max-w-6xl mx-auto select-none">
       {/* Header Monotype x Colophon Style */}
-      <div className="text-center space-y-1.5 pb-3 border-b border-white/[0.08] px-2">
-        <div className="inline-flex items-center gap-2 text-[10px] font-telemetry tracking-widest text-[var(--cl-text-muted)] uppercase">
+      <div className="text-center space-y-1.5 pb-3 border-b border-black/[0.08] px-2">
+        <div className="inline-flex items-center gap-2 text-[10px] font-telemetry tracking-widest text-slate-500 uppercase font-semibold">
           <span>CARLOG</span>
-          <span className="text-red-500 font-bold">×</span>
-          <span>MANUFACTURERS ARCHIVE</span>
+          <span className="text-red-600 font-bold">×</span>
+          <span>ARCHIVO DE MARCAS</span>
         </div>
-        <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase">
+        <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#111318] tracking-tight uppercase">
           Biblioteca de Marcas
         </h2>
-        <p className="text-xs text-[var(--cl-text-secondary)] max-w-xs mx-auto">
-          Desliza horizontalmente y toca un volumen para abrir sus vehículos en el taller 3D.
+        <p className="text-xs text-slate-600 max-w-xs mx-auto">
+          Desliza horizontalmente y toca un volumen para abrir tus autos capturados en 3D.
         </p>
 
-        {/* Quick Access Pills: Ver Toda la Flota & Catálogo 3D Showroom */}
+        {/* Quick Access Pills: Mi Flota & Catálogo 3D (solo vista) */}
         <div className="pt-2 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => onSelectBrand('ALL')}
-            className="px-4 py-1.5 rounded-full cl-pill hover:bg-[#232838] text-[11px] font-telemetry font-bold text-zinc-200 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+            className="px-4 py-1.5 rounded-full bg-white hover:bg-red-50 border border-black/[0.1] text-[11px] font-telemetry font-bold text-[#111318] transition flex items-center gap-1.5 active:scale-95 shadow-2xs"
           >
-            <Warehouse className="w-3.5 h-3.5 text-zinc-400" />
+            <Warehouse className="w-3.5 h-3.5 text-red-600" />
             <span>
               {showingShowroom ? `Ver Showroom (${garage.length})` : `Mi Flota (${garage.length})`}
             </span>
@@ -398,13 +398,13 @@ export default function BrandBookshelf({
               onClick={onToggleShowroom}
               className={`px-4 py-1.5 rounded-full border text-[11px] font-telemetry font-bold transition flex items-center gap-1.5 active:scale-95 ${
                 showingShowroom
-                  ? 'bg-white text-[#08090c] border-white shadow-sm'
-                  : 'cl-panel text-zinc-300 hover:text-white hover:border-white/20'
+                  ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                  : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
               }`}
             >
               <Box className="w-3.5 h-3.5" />
               <span>
-                {showingShowroom ? 'Volver a Mi Progreso' : `Catálogo 3D (${showroomCount})`}
+                {showingShowroom ? 'Volver a Mi Flota' : `Catálogo 3D (${showroomCount})`}
               </span>
             </button>
           )}
@@ -414,12 +414,12 @@ export default function BrandBookshelf({
       {/* The Bookshelf Showcase Container */}
       <div className="relative rounded-3xl cl-card cl-microgrid p-3 sm:p-6 overflow-hidden min-h-[450px] flex flex-col justify-end">
         {/* Ambient Top Studio Lighting */}
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+        <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-red-50/40 to-transparent pointer-events-none"></div>
 
         {/* Floating Left Navigation Arrow Button */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/80 border border-white/20 text-white flex items-center justify-center hover:bg-zinc-800 hover:text-white hover:border-zinc-500 active:scale-90 transition shadow-2xl backdrop-blur-md"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/95 border border-black/[0.1] text-[#111318] flex items-center justify-center hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-90 transition shadow-lg backdrop-blur-md"
           title="Deslizar marcas a la izquierda"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
@@ -428,7 +428,7 @@ export default function BrandBookshelf({
         {/* Floating Right Navigation Arrow Button */}
         <button
           onClick={() => scroll('right')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/80 border border-white/20 text-white flex items-center justify-center hover:bg-zinc-800 hover:text-white hover:border-zinc-500 active:scale-90 transition shadow-2xl backdrop-blur-md"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/95 border border-black/[0.1] text-[#111318] flex items-center justify-center hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-90 transition shadow-lg backdrop-blur-md"
           title="Deslizar marcas a la derecha"
         >
           <ChevronRight className="w-5 h-5 stroke-[2.5]" />
@@ -437,17 +437,17 @@ export default function BrandBookshelf({
         {/* Hovered Brand Live Status Tip */}
         <div className="text-center mb-2 z-20">
           {hoveredBrand ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700 text-[11px] text-white font-mono shadow">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-red-200 text-[11px] text-[#111318] font-mono shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
               <span>{hoveredBrand}:</span>
-              <strong className="text-zinc-200">
+              <strong className="text-red-700">
                 {(brandGroups[hoveredBrand] || []).length} modelo(s) en tu garage
               </strong>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-zinc-500">
-              <BookOpen className="w-3 h-3" />
-              <span>Toca las flechas o desliza con el dedo / rueda para girar entre libros</span>
+            <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
+              <BookOpen className="w-3 h-3 text-red-500" />
+              <span>Toca las flechas o desliza para explorar por marca</span>
             </div>
           )}
         </div>
@@ -521,9 +521,9 @@ export default function BrandBookshelf({
           })}
         </div>
 
-        {/* The Wooden / Metallic Shelf Ledge */}
-        <div className="relative z-20 w-full h-4 bg-gradient-to-r from-zinc-800 via-zinc-700 to-zinc-800 border-t border-zinc-600 shadow-2xl rounded-b-md flex items-center justify-between px-4">
-          <div className="h-0.5 w-full bg-black/40 rounded-full"></div>
+        {/* The Clean Architectural Shelf Ledge */}
+        <div className="relative z-20 w-full h-3.5 bg-gradient-to-r from-slate-200 via-white to-slate-200 border-t border-black/[0.08] shadow-md rounded-b-md flex items-center justify-between px-4">
+          <div className="h-0.5 w-full bg-red-500/25 rounded-full"></div>
         </div>
       </div>
 
@@ -535,10 +535,10 @@ export default function BrandBookshelf({
             <button
               key={b}
               onClick={() => onSelectBrand(b, brandGroups[b] || [])}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-[10px] font-mono font-bold text-zinc-300 hover:text-white border border-zinc-800 whitespace-nowrap transition active:scale-95 flex items-center gap-1"
+              className="px-2.5 py-1 rounded-lg bg-white hover:bg-red-50 text-[10px] font-mono font-bold text-[#111318] hover:text-red-700 border border-black/[0.08] whitespace-nowrap transition active:scale-95 flex items-center gap-1 shadow-2xs"
             >
               <span>{b}</span>
-              {count > 0 && <span className="text-amber-400">({count})</span>}
+              {count > 0 && <span className="text-red-600">({count})</span>}
             </button>
           );
         })}
