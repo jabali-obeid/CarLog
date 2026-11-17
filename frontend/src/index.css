@@ -64,6 +64,8 @@
     background-color: var(--cl-canvas);
     color: var(--cl-text-primary);
     font-family: var(--font-sans);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -71,8 +73,20 @@
     background-color: var(--cl-canvas);
     color: var(--cl-text-primary);
     font-family: var(--font-sans);
+    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  @media (pointer: coarse) {
+    input, textarea, select {
+      font-size: 16px;
+    }
   }
 
   code, pre, kbd, samp, .font-mono {
