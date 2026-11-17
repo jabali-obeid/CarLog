@@ -373,30 +373,41 @@ export async function publishRadarSpot({
 
   let persistedCloud = false;
   const supabase = getSupabase();
-  if (!isSim && supabase && isSupabaseConfigured() && session?.provider === 'supabase' && session?.id) {
+  if (!isSim && supabase && isSupabaseConfigured()) {
     try {
-      const { error } = await supabase.from('radar_spots').insert({
-        id: newSpot.id,
-        user_id: session.id,
-        brand: newSpot.brand,
-        model: newSpot.model,
-        year: newSpot.year,
-        rarity: newSpot.rarity,
-        hp: newSpot.hp,
-        zero_to_hundred: newSpot.zeroToHundred,
-        top_speed: newSpot.topSpeed,
-        engine: newSpot.engine,
-        color: newSpot.color,
-        image_silhouette: newSpot.imageSilhouette,
-        spotted_by: newSpot.spottedBy,
-        address: newSpot.address,
-        lat: newSpot.lat,
-        lng: newSpot.lng,
-        distance_meters: newSpot.distanceMeters,
-        spotted_at: newSpot.spottedAt,
-        expires_at: newSpot.expiresAt
-      });
-      if (!error) persistedCloud = true;
+      let cloudUserId = (session?.isCloud || session?.provider === 'supabase') ? session?.id : null;
+      if (!cloudUserId) {
+        const { data: authData } = await supabase.auth.getSession();
+        cloudUserId = authData?.session?.user?.id || null;
+      }
+      if (cloudUserId) {
+        const { error } = await supabase.from('radar_spots').insert({
+          id: newSpot.id,
+          user_id: cloudUserId,
+          brand: newSpot.brand,
+          model: newSpot.model,
+          year: newSpot.year,
+          rarity: newSpot.rarity,
+          hp: newSpot.hp,
+          zero_to_hundred: newSpot.zeroToHundred,
+          top_speed: newSpot.topSpeed,
+          engine: newSpot.engine,
+          color: newSpot.color,
+          image_silhouette: newSpot.imageSilhouette,
+          spotted_by: newSpot.spottedBy,
+          address: newSpot.address,
+          lat: newSpot.lat,
+          lng: newSpot.lng,
+          distance_meters: newSpot.distanceMeters,
+          spotted_at: newSpot.spottedAt,
+          expires_at: newSpot.expiresAt
+        });
+        if (!error) {
+          persistedCloud = true;
+        } else {
+          console.warn('Supabase radar_spots insert error:', error.message || error);
+        }
+      }
     } catch (e) {
       console.warn('Supabase radar insert fallback to local:', e);
     }

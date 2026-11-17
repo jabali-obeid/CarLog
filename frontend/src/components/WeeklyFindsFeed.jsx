@@ -108,21 +108,31 @@ export default function WeeklyFindsFeed({
 
   useEffect(() => {
     let active = true;
-    fetchWeeklyRealFinds()
-      .then((items) => {
-        if (active) {
-          setRealFinds(Array.isArray(items) ? items : []);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setRealFinds([]);
-          setLoading(false);
-        }
-      });
+    const loadFinds = () => {
+      fetchWeeklyRealFinds()
+        .then((items) => {
+          if (active) {
+            setRealFinds(Array.isArray(items) ? items : []);
+            setLoading(false);
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setRealFinds([]);
+            setLoading(false);
+          }
+        });
+    };
+
+    loadFinds();
+    const intervalId = setInterval(loadFinds, 20000);
+    const onFocus = () => loadFinds();
+    window.addEventListener('focus', onFocus);
+
     return () => {
       active = false;
+      clearInterval(intervalId);
+      window.removeEventListener('focus', onFocus);
     };
   }, []);
 
