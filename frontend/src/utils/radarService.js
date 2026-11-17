@@ -1,12 +1,18 @@
 import { getSupabase, isSupabaseConfigured } from './supabaseClient';
 import { getCurrentSession } from './auth';
-import { POKEDEX_CARS } from './demoData';
 
 const LOCAL_RADAR_KEY = 'carlog_local_radar_spots';
+const WEEKLY_FINDS_KEY = 'carlog_weekly_real_finds';
 const CLAIMED_SPOTS_KEY = 'carlog_claimed_radar_spots';
 const USER_COORDS_KEY = 'carlog_last_coords';
 const DEFAULT_CENTER = { lat: -34.5764, lng: -58.4148 }; // Palermo / Av. del Libertador, Buenos Aires
 const DEFAULT_SPOT_TTL_MS = 30 * 60 * 1000;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function isSimulatedSpotId(id = '') {
+  const s = String(id || '');
+  return s.startsWith('sim-') || s.startsWith('seed-spot-');
+}
 
 const SIMULATION_POOL = [
   {
@@ -236,7 +242,9 @@ function readLocalSpotsRaw() {
     const saved = JSON.parse(localStorage.getItem(LOCAL_RADAR_KEY) || '[]');
     if (!Array.isArray(saved)) return [];
     const now = Date.now();
-    return saved.filter((s) => !s?.expiresAt || new Date(s.expiresAt).getTime() > now);
+    return saved.filter(
+      (s) => s && !String(s.id || '').startsWith('seed-spot-') && (!s.expiresAt || new Date(s.expiresAt).getTime() > now)
+    );
   } catch {
     return [];
   }
@@ -250,35 +258,30 @@ function writeLocalSpotsRaw(list) {
   }
 }
 
-function buildInitialSeedSpots(userCoords) {
-  const center = userCoords || DEFAULT_CENTER;
-  const bearings = [38, 145, 252];
-  const distances = [420, 740, 1080];
-  return POKEDEX_CARS.slice(0, 3).map((c, idx) => {
-    const pos = offsetCoordinates(center.lat, center.lng, distances[idx], bearings[idx]);
-    const now = Date.now();
-    return {
-      id: `seed-spot-${c.id}`,
-      brand: c.brand,
-      model: c.name,
-      year: c.year,
-      rarity: c.rarity,
-      hp: c.hp,
-      zeroToHundred: parseFloat(c.zeroToHundred) || 4.0,
-      topSpeed: parseInt(c.topSpeed, 10) || 260,
-      engine: c.engine,
-      color: c.color,
-      imageSilhouette: c.image,
-      spottedBy: idx === 0 ? 'Spotter_Palermo' : 'CarLog_Radar',
-      address: c.recentSpottedLocation || STREETS_BA[idx % STREETS_BA.length],
-      lat: pos.lat,
-      lng: pos.lng,
-      bearingDeg: bearings[idx],
-      distanceMeters: distances[idx],
-      spottedAt: new Date(now - idx * 180000).toISOString(),
-      expiresAt: new Date(now + (26 - idx * 4) * 60000).toISOString()
-    };
-  });
+export function recordLocalRealFind(car) {
+  if (!car || isSimulatedSpotId(car.id)) return;
+  const now = Date.now();
+  const entry = {
+    ...car,
+    id: car.id || `find-${now}`,
+    model: car.model || car.name || 'Modelo',
+    imageUrl: car.imageUrl || car.imageSilhouette || car.image || '',
+    spottedAt: car.spottedAt || car.capturedAt || new Date(now).toISOString()
+  };
+  try {
+    const existing = JSON.parse(localStorage.getItem(WEEKLY_FINDS_KEY) || '[]');
+    const cutoff = now - WEEK_MS;
+    const valid = (Array.isArray(existing) ? existing : []).filter(
+      (item) =>
+        item &&
+        !isSimulatedSpotId(item.id) &&
+        new Date(item.spottedAt || item.capturedAt || 0).getTime() >= cutoff &&
+        item.id !== entry.id
+    );
+    localStorage.setItem(WEEKLY_FINDS_KEY, JSON.stringify([entry, ...valid].slice(0, 60)));
+  } catch {
+    // Ignore storage quota errors
+  }
 }
 
 export function getClaimedSpotIds() {
@@ -344,14 +347,76 @@ export async function fetchRadarSpots(userCoords = null) {
     // Expected on static/Netlify deployment without Express /api/radar
   }
 
-  const fallbackRaw = localSpots.length > 0 ? localSpots : buildInitialSeedSpots(userCoords);
-  if (localSpots.length === 0) {
-    writeLocalSpotsRaw(fallbackRaw);
-  }
   return {
-    spots: fallbackRaw.map((r) => normalizeRadarSpot(r, userCoords)),
+    spots: localSpots.map((r) => normalizeRadarSpot(r, userCoords)),
     source: 'local'
   };
+}
+
+export async function fetchWeeklyRealFinds() {
+  const weekCutoffIso = new Date(Date.now() - WEEK_MS).toISOString();
+  const weekCutoffMs = Date.now() - WEEK_MS;
+  const results = [];
+  const seenIds = new Set();
+
+  const pushUnique = (raw) => {
+    if (!raw || isSimulatedSpotId(raw.id)) return;
+    const spottedTime = new Date(raw.spotted_at || raw.spottedAt || raw.capturedAt || 0).getTime();
+    if (!Number.isFinite(spottedTime) || spottedTime < weekCutoffMs) return;
+    const id = String(raw.id || `${raw.brand}-${raw.model}-${spottedTime}`);
+    if (seenIds.has(id)) return;
+    seenIds.add(id);
+    results.push({
+      id,
+      brand: raw.brand,
+      model: raw.model || raw.name || 'Modelo',
+      year: raw.year ? String(raw.year) : '',
+      rarity: raw.rarity || 'Común',
+      hp: Number(raw.hp) || 0,
+      zeroToHundred: Number(raw.zero_to_hundred ?? raw.zeroToHundred) || 0,
+      topSpeed: Number(raw.top_speed ?? raw.topSpeed) || 0,
+      engine: raw.engine || '',
+      color: raw.color || '',
+      country: raw.country || '',
+      funFact: raw.funFact || raw.fun_fact || '',
+      model3dUrl: raw.model3dUrl || raw.model_3d_url || '',
+      imageUrl: raw.image_silhouette || raw.imageSilhouette || raw.imageUrl || raw.image || '',
+      spottedBy: raw.spotted_by || raw.spottedBy || 'Spotter',
+      location: raw.address || raw.location || 'Ubicación en calle',
+      spottedAt: raw.spotted_at || raw.spottedAt || raw.capturedAt
+    });
+  };
+
+  const supabase = getSupabase();
+  if (supabase && isSupabaseConfigured()) {
+    try {
+      const { data, error } = await supabase
+        .from('radar_spots')
+        .select('*')
+        .gte('spotted_at', weekCutoffIso)
+        .not('id', 'like', 'sim-%')
+        .not('id', 'like', 'seed-spot-%')
+        .order('spotted_at', { ascending: false })
+        .limit(60);
+
+      if (!error && Array.isArray(data)) {
+        data.forEach(pushUnique);
+      }
+    } catch (err) {
+      console.warn('Supabase weekly finds read fallback:', err);
+    }
+  }
+
+  try {
+    const localFinds = JSON.parse(localStorage.getItem(WEEKLY_FINDS_KEY) || '[]');
+    if (Array.isArray(localFinds)) localFinds.forEach(pushUnique);
+  } catch {
+    // Ignore storage read errors
+  }
+
+  readLocalSpotsRaw().forEach(pushUnique);
+
+  return results;
 }
 
 export async function publishRadarSpot({
@@ -367,8 +432,9 @@ export async function publishRadarSpot({
   const pos = coords ? { lat: center.lat, lng: center.lng } : offsetCoordinates(center.lat, center.lng, dist, bearing);
 
   const now = Date.now();
+  const isSim = isSimulatedSpotId(car?.id);
   const newSpot = {
-    id: `spot-${now}-${Math.floor(Math.random() * 1000)}`,
+    id: isSim ? car.id : `spot-${now}-${Math.floor(Math.random() * 1000)}`,
     brand: String(car?.brand || 'Deportivo').trim(),
     model: String(car?.model || car?.name || 'Modelo').trim(),
     year: car?.year ? String(car.year) : String(new Date().getFullYear()),
@@ -378,11 +444,9 @@ export async function publishRadarSpot({
     topSpeed: Number(car?.topSpeed) || 0,
     engine: car?.engine || '',
     color: car?.color || '',
-    imageSilhouette: car?.imageUrl || car?.imageSilhouette || car?.image || SIMULATION_POOL[0].imageUrl,
-    spottedBy: session?.username || 'Tú (Spotter Oficial)',
-    address:
-      (address || '').trim() ||
-      (coords ? 'Ubicación GPS verificada' : STREETS_BA[Math.floor(Math.random() * STREETS_BA.length)]),
+    imageSilhouette: car?.imageUrl || car?.imageSilhouette || car?.image || '',
+    spottedBy: car?.spottedBy || session?.username || 'Spotter',
+    address: (address || '').trim() || (coords ? 'Ubicación GPS verificada' : 'Avistamiento en calle'),
     lat: pos.lat,
     lng: pos.lng,
     bearingDeg: bearing,
@@ -393,7 +457,7 @@ export async function publishRadarSpot({
 
   let persistedCloud = false;
   const supabase = getSupabase();
-  if (supabase && isSupabaseConfigured() && session?.provider === 'supabase' && session?.id) {
+  if (!isSim && supabase && isSupabaseConfigured() && session?.provider === 'supabase' && session?.id) {
     try {
       const { error } = await supabase.from('radar_spots').insert({
         id: newSpot.id,
@@ -422,17 +486,21 @@ export async function publishRadarSpot({
     }
   }
 
-  try {
-    const res = await fetch('/api/radar/spot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...newSpot, imageUrl: newSpot.imageSilhouette })
+  if (!isSim) {
+    recordLocalRealFind({
+      ...newSpot,
+      imageUrl: newSpot.imageSilhouette,
+      location: newSpot.address
     });
-    if (res.ok && !persistedCloud) {
-      // Also saved on local Express server
+    try {
+      await fetch('/api/radar/spot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newSpot, imageUrl: newSpot.imageSilhouette })
+      });
+    } catch {
+      // Static frontend without Express server
     }
-  } catch {
-    // Static frontend without Express server
   }
 
   // Always cache locally too so offline/guest sessions see immediate radar updates

@@ -5,8 +5,8 @@ import CarCard from './CarCard';
 import { sound } from '../utils/audio';
 import { compressImage } from '../utils/imageUtils';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
-import { isCarInSavedSet } from '../utils/auth';
-import { publishRadarSpot, getSavedUserCoords, requestUserLocation } from '../utils/radarService';
+import { isCarInSavedSet, getCurrentSession } from '../utils/auth';
+import { publishRadarSpot, getSavedUserCoords, requestUserLocation, recordLocalRealFind } from '../utils/radarService';
 
 const DAILY_SCAN_LIMIT = 15;
 
@@ -371,6 +371,14 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       setTimeout(() => setToastMessage(null), 3600);
       return;
     }
+    const session = getCurrentSession();
+    const coords = getSavedUserCoords();
+    recordLocalRealFind({
+      ...car,
+      spottedBy: car.spottedBy || session?.username || 'Vos',
+      location: car.address || car.location || (coords ? 'GPS verificado' : 'Escaneo en calle'),
+      spottedAt: new Date().toISOString()
+    });
     setToastMessage(`${car.brand} ${car.model} guardado en tu Garage`);
     setTimeout(() => setToastMessage(null), 3500);
   };

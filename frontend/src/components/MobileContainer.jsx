@@ -1,18 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Settings, Camera, Radio, Check,
   BookOpen, Smartphone, Flame, User, LogOut
 } from 'lucide-react';
-import { POKEDEX_CARS } from '../utils/demoData';
 import WeeklyFindsFeed from './WeeklyFindsFeed';
 import FluidBottomDock from './FluidBottomDock';
-
-const CATALOG_ALIAS_IDS = new Set([
-  'porsche-gt3rs',
-  'bmw-m3-g80',
-  'car-seed-1',
-  'toyota-corolla-seed'
-]);
 
 export default function MobileContainer({
   activeTab,
@@ -24,8 +16,6 @@ export default function MobileContainer({
   user,
   onOpenAuth,
   onLogout,
-  showroomCars = [],
-  showroomLoading = false,
   onOpenCarIn3D,
   isGarageShowroom = false,
   renderGarageContent,
@@ -65,58 +55,36 @@ export default function MobileContainer({
     }
   };
 
-  // Merge featured Pokedex studio cars first with full catalog, deduplicating aliases
-  const showcaseCars = useMemo(() => {
-    const featured = POKEDEX_CARS.map((c) => ({
-      ...c,
-      model: c.model || c.name,
-      imageUrl: c.imageUrl || c.image,
-      funFact: c.funFact || c.description
-    }));
-    const seenKeys = new Set(
-      featured.map((c) => `${(c.brand || '').toLowerCase()}::${(c.model || '').toLowerCase()}`)
-    );
-    const extras = (Array.isArray(showroomCars) ? showroomCars : []).filter((c) => {
-      if (!c || CATALOG_ALIAS_IDS.has(c.id)) return false;
-      const key = `${(c.brand || '').toLowerCase()}::${(c.model || c.name || '').toLowerCase()}`;
-      if (seenKeys.has(key)) return false;
-      seenKeys.add(key);
-      return true;
-    });
-    return [...featured, ...extras];
-  }, [showroomCars]);
-
   const handleCapture = async (targetCar) => {
-    const selected = targetCar || showcaseCars[0];
-    if (!selected) return;
-    const modelName = selected.model || selected.name || 'Modelo';
+    if (!targetCar) return;
+    const modelName = targetCar.model || targetCar.name || 'Modelo';
     const res = await onSaveToGarage({
-      id: selected.id,
-      brand: selected.brand,
+      id: targetCar.id,
+      brand: targetCar.brand,
       model: modelName,
-      year: selected.year,
-      rarity: selected.rarity,
-      hp: selected.hp,
-      zeroToHundred: parseFloat(selected.zeroToHundred) || 0,
-      topSpeed: parseInt(selected.topSpeed, 10) || 0,
-      engine: selected.engine,
-      color: selected.color,
-      imageUrl: selected.imageUrl || selected.image,
-      funFact: selected.funFact || selected.description
+      year: targetCar.year,
+      rarity: targetCar.rarity,
+      hp: targetCar.hp,
+      zeroToHundred: parseFloat(targetCar.zeroToHundred) || 0,
+      topSpeed: parseInt(targetCar.topSpeed, 10) || 0,
+      engine: targetCar.engine,
+      color: targetCar.color,
+      imageUrl: targetCar.imageUrl || targetCar.image,
+      funFact: targetCar.funFact || targetCar.description
     });
     if (res?.saved === false) {
-      setToast(res.error || `${selected.brand} ${modelName} ya está en tu Garage`);
+      setToast(res.error || `${targetCar.brand} ${modelName} ya está en tu Garage`);
       setTimeout(() => setToast(null), 3400);
       return;
     }
-    setToast(`${selected.brand} ${modelName} guardado en tu Garage`);
+    setToast(`${targetCar.brand} ${modelName} guardado en tu Garage`);
     setTimeout(() => setToast(null), 3000);
   };
 
   const isLightView = activeTab === 'cardex' || (activeTab === 'garage' && isGarageShowroom);
 
   const navItems = [
-    { id: 'cardex', label: 'Hallazgos', icon: Flame },
+    { id: 'cardex', label: 'HOT', icon: Flame },
     { id: 'garage', label: 'Garage', icon: BookOpen, badge: garage.length > 0 ? garage.length : null },
     { id: 'scanner', label: 'Escanear', icon: Camera, primary: true },
     { id: 'radar', label: 'Radar', icon: Radio },
@@ -282,15 +250,15 @@ export default function MobileContainer({
 
         {/* Dynamic App Tab Body */}
         <main className="relative z-20 flex-1 flex flex-col overflow-hidden">
-          {/* TAB 1: WEEKLY TOP RARE FINDS (HALLAZGOS DE LA SEMANA) */}
+          {/* TAB 1: HOT WEEKLY REAL FINDS */}
           {activeTab === 'cardex' && (
             <div className="flex-1 overflow-y-auto pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               <WeeklyFindsFeed
-                cars={showcaseCars}
                 savedIds={savedIds}
                 onSaveToGarage={handleCapture}
                 onOpenIn3D={onOpenCarIn3D}
-                loadingCatalog={showroomLoading}
+                onOpenScanner={() => onTabChange('scanner')}
+                onOpenRadar={() => onTabChange('radar')}
               />
             </div>
           )}
