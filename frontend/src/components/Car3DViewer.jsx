@@ -747,17 +747,78 @@ export default function Car3DViewer({
             controls.update();
             controls.saveState();
 
+            const clonedMaterialsByRole = new Map();
+            const getSemanticRole = (nodeName, matName) => {
+              const hint = `${nodeName || ''} ${matName || ''}`.toLowerCase();
+              if (/tire|tyre|pneu|rubber|lastik/.test(hint)) return 'tire';
+              if (/glass|windshield|window|vidro|vitre|clearglass/.test(hint) && !/redglass/.test(hint)) return 'glass';
+              if (/taillight|redglass|lanterna|arkalar|brakelight/.test(hint)) return 'taillight';
+              if (/headlight|farol|phare|foglight/.test(hint)) return 'headlight';
+              if (/chrome|mirror|alloy|\brim\b|spoke/.test(hint)) return 'chrome';
+              if (/black_?plastic|blacktrim|prt_blk|grille|\bblack\b/.test(hint) && !/primary|paint|body/.test(hint)) return 'trim';
+              if (/interior|seat|alcantara|painel|gauge|dial|mechanical|chassis|engine|shock|caliper|disc/.test(hint)) return 'mechanical';
+              return 'default';
+            };
+
             model.traverse((node) => {
-              if (node.isMesh) {
-                node.castShadow = true;
-                node.receiveShadow = true;
-                const mats = Array.isArray(node.material) ? node.material : [node.material];
-                mats.forEach((m) => {
-                  if (m && m.color && !m.userData.__origColor) {
-                    m.userData.__origColor = m.color.clone();
+              if (!node.isMesh) return;
+              node.castShadow = true;
+              node.receiveShadow = true;
+              const isMulti = Array.isArray(node.material);
+              const mats = isMulti ? node.material : [node.material];
+              const nextMats = mats.map((m) => {
+                if (!m || !m.color) return m;
+                const role = getSemanticRole(node.name, m.name);
+                const cacheKey = `${m.uuid}::${role}`;
+                let targetMat = clonedMaterialsByRole.get(cacheKey);
+                if (!targetMat) {
+                  const hsl = {};
+                  m.color.getHSL(hsl);
+                  const isUncoloredWhite = !m.map && hsl.l > 0.72 && hsl.s < 0.16;
+                  const needsRepair =
+                    role !== 'default' &&
+                    (isUncoloredWhite || (role === 'glass' && !m.map && !m.transparent && !m.transmission));
+
+                  targetMat = needsRepair ? m.clone() : m;
+                  if (needsRepair) {
+                    if (role === 'tire' || role === 'trim') {
+                      targetMat.color.setHex(0x17191d);
+                      targetMat.roughness = 0.85;
+                      targetMat.metalness = 0.08;
+                    } else if (role === 'glass') {
+                      targetMat.color.setHex(0x0d1520);
+                      targetMat.transparent = true;
+                      targetMat.opacity = 0.42;
+                      targetMat.roughness = 0.08;
+                      targetMat.metalness = 0.25;
+                    } else if (role === 'taillight') {
+                      targetMat.color.setHex(0x991b1b);
+                      targetMat.roughness = 0.18;
+                      targetMat.metalness = 0.1;
+                    } else if (role === 'headlight') {
+                      targetMat.color.setHex(0xdbeafe);
+                      targetMat.transparent = true;
+                      targetMat.opacity = 0.55;
+                      targetMat.roughness = 0.08;
+                    } else if (role === 'chrome') {
+                      targetMat.color.setHex(0xd4d8df);
+                      targetMat.metalness = 0.92;
+                      targetMat.roughness = 0.14;
+                    } else if (role === 'mechanical') {
+                      targetMat.color.setHex(0x23262b);
+                      targetMat.roughness = 0.72;
+                      targetMat.metalness = 0.18;
+                    }
+                    targetMat.needsUpdate = true;
                   }
-                });
-              }
+                  clonedMaterialsByRole.set(cacheKey, targetMat);
+                }
+                if (!targetMat.userData.__origColor) {
+                  targetMat.userData.__origColor = targetMat.color.clone();
+                }
+                return targetMat;
+              });
+              node.material = isMulti ? nextMats : nextMats[0];
             });
 
             loadedModelRef.current = model;
@@ -897,18 +958,14 @@ export default function Car3DViewer({
         const hsl = {};
         mat.userData.__origColor.getHSL(hsl);
         const nameHint = `${node.name || ''} ${mat.name || ''}`.toLowerCase();
+        const looksExplicitlyBody =
+          /primary|carpaint|carrosserie|\bpaint\b|\bbody\b|\black\b/.test(nameHint);
         const looksLikeNonBody =
           mat.transparent ||
           mat.opacity < 0.95 ||
           hsl.l < 0.14 ||
-          nameHint.includes('tire') ||
-          nameHint.includes('wheel') ||
-          nameHint.includes('rim') ||
-          nameHint.includes('glass') ||
-          nameHint.includes('window') ||
-          nameHint.includes('windshield') ||
-          nameHint.includes('light') ||
-          nameHint.includes('chrome');
+          /tire|tyre|pneu|rubber|lastik|wheel|\brim\b|spoke|glass|window|windshield|vidro|vitre|chrome|mirror|taillight|headlight|farol|lanterna|phare|foglight|signal|indicator|interior|seat|alcantara|painel|gauge|dial|mechanical|chassis|brake|disc|caliper|engine|shock|placa|plate/.test(nameHint) ||
+          (!looksExplicitlyBody && /black|plastic|trim|grille/.test(nameHint));
 
         if (!looksLikeNonBody) {
           mat.color.set(paintOverrideHex);
