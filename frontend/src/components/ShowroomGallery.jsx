@@ -3,6 +3,7 @@ import {
   Search, SlidersHorizontal, ArrowUpRight, LayoutGrid, Rows3,
   Check, Warehouse, X, ArrowUpDown, BookOpen, Box
 } from 'lucide-react';
+import { isCarInSavedSet } from '../utils/auth';
 
 const RARITY_OPTIONS = ['Todos', 'Legendario', 'Histórico', 'Raro', 'Común', 'Básico'];
 
@@ -183,14 +184,15 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
           <div className="flex items-center justify-between gap-2 pt-2 border-t border-black/[0.06]">
             <button
               type="button"
+              disabled={isSaved}
               onClick={(e) => {
                 e.stopPropagation();
                 onSaveToGarage(car);
               }}
-              className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1.5 active:scale-[0.98] ${
+              className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-semibold transition flex items-center justify-center gap-1.5 ${
                 isSaved
-                  ? 'bg-emerald-600/12 text-emerald-800 border border-emerald-700/20'
-                  : 'bg-[#111318] text-white hover:bg-[#1f2430]'
+                  ? 'bg-emerald-600/12 text-emerald-800 border border-emerald-700/20 cursor-default'
+                  : 'bg-[#111318] text-white hover:bg-[#1f2430] active:scale-[0.98]'
               }`}
             >
               {isSaved ? <Check className="w-3 h-3" /> : <Warehouse className="w-3 h-3" />}
@@ -568,7 +570,7 @@ export default function ShowroomGallery({
         <div className={`grid gap-3 ${layout === 'grid' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {filteredCars.map((car) => {
             const key = car.id || `${car.brand}-${car.model || car.name}`;
-            const isSaved = savedIds.has(car.id) || savedIds.has(`${car.brand}-${car.model || car.name}`);
+            const isSaved = isCarInSavedSet(car, savedIds);
             return (
               <ShowroomCard
                 key={key}

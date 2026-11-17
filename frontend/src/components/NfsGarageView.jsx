@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, ChevronRight, Zap, Gauge, Award,
-  Trash2, ShieldCheck, Sparkles, Sliders, Box, Image, BookOpen, Warehouse, Check
+  Trash2, ShieldCheck, Sparkles, Sliders, Box, Image, BookOpen, Warehouse, Check,
+  Sun, Moon, Cpu
 } from 'lucide-react';
 import { RARITY_CONFIG } from '../utils/demoData';
+import { isCarInSavedSet } from '../utils/auth';
 import Car3DViewer from './Car3DViewer';
 
-export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner, onBackToBookshelf, selectedBrandTitle, initialCarId = null }) {
+const STUDIO_PAINT_SWATCHES = [
+  { id: 'original', label: 'Original', hex: null, dotStyle: 'conic-gradient(from 45deg, #e5e7eb, #374151, #dc2626, #e5e7eb)' },
+  { id: 'white', label: 'Blanco Glaciar', hex: '#F3F4F6' },
+  { id: 'black', label: 'Negro Obsidiana', hex: '#18181B' },
+  { id: 'red', label: 'Rojo Corsa', hex: '#DC2626' },
+  { id: 'blue', label: 'Azul Eléctrico', hex: '#1D4ED8' },
+  { id: 'green', label: 'Verde Inglés', hex: '#15803D' }
+];
+
+export default function NfsGarageView({
+  garage = [],
+  onDeleteCar,
+  onOpenScanner,
+  onBackToBookshelf,
+  selectedBrandTitle,
+  initialCarId = null,
+  studioTheme = 'light',
+  onToggleStudioTheme,
+  onSaveToGarage,
+  savedIds = new Set()
+}) {
   const [selectedIndex, setSelectedIndex] = useState(() => {
     if (!initialCarId || garage.length === 0) return 0;
     const found = garage.findIndex(
@@ -15,9 +37,12 @@ export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner,
     return found >= 0 ? found : 0;
   });
   const [neonColor, setNeonColor] = useState('cyan'); // 'cyan' | 'purple' | 'red' | 'green' | 'amber'
+  const [paintSwatch, setPaintSwatch] = useState('original');
   const [viewMode3D, setViewMode3D] = useState(true); // Default to 3D interactive mode!
   const [generating3D, setGenerating3D] = useState(false);
   const [toast3D, setToast3D] = useState(null);
+
+  const isLightStudio = studioTheme === 'light';
 
   useEffect(() => {
     if (garage.length === 0) {
@@ -78,6 +103,7 @@ export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner,
   ];
 
   const activeNeon = neonColors.find(c => c.id === neonColor) || neonColors[0];
+  const activePaintHex = STUDIO_PAINT_SWATCHES.find((s) => s.id === paintSwatch)?.hex || null;
 
   if (garage.length === 0) {
     return (
@@ -122,6 +148,310 @@ export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner,
   const speedPct = Math.min(100, Math.round(((currentCar?.topSpeed || 200) / 360) * 100));
 
   const rarityCfg = RARITY_CONFIG[currentCar?.rarity] || RARITY_CONFIG['Común'];
+  const isSavedCurrent = isCarInSavedSet(currentCar, savedIds);
+
+  if (isLightStudio) {
+    return (
+      <div className="min-h-full bg-[#f8f9fa] text-[#111318] px-3.5 pt-3 pb-6 space-y-4 select-none animate-fade-in">
+        {toast3D && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2"
+          >
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{toast3D}</span>
+          </div>
+        )}
+
+        {/* Top Studio Bar */}
+        <div className="flex items-center justify-between gap-2">
+          {onBackToBookshelf ? (
+            <button
+              type="button"
+              onClick={onBackToBookshelf}
+              className="h-8 px-3 rounded-full bg-white hover:bg-zinc-100 border border-black/[0.08] text-[#111318] text-[11px] font-semibold transition flex items-center gap-1.5 shadow-2xs active:scale-95"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 text-zinc-600" />
+              <span>Volver</span>
+            </button>
+          ) : (
+            <span className="text-[11px] font-telemetry uppercase tracking-wider text-zinc-500">
+              {selectedBrandTitle || 'Showroom'}
+            </span>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            {onToggleStudioTheme && (
+              <button
+                type="button"
+                onClick={onToggleStudioTheme}
+                className="h-8 px-2.5 rounded-full bg-white hover:bg-zinc-100 border border-black/[0.08] text-[11px] font-semibold text-[#111318] flex items-center gap-1 shadow-2xs transition active:scale-95"
+                title="Cambiar a Taller Oscuro"
+              >
+                <Moon className="w-3.5 h-3.5 text-zinc-600" />
+                <span>Noche</span>
+              </button>
+            )}
+
+            <div className="h-8 p-0.5 rounded-full bg-white border border-black/[0.08] flex items-center shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode3D(true)}
+                className={`px-2.5 h-full rounded-full text-[11px] font-semibold transition flex items-center gap-1 ${
+                  viewMode3D ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                }`}
+              >
+                <Box className="w-3 h-3" />
+                <span>3D</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode3D(false)}
+                className={`px-2.5 h-full rounded-full text-[11px] font-semibold transition flex items-center gap-1 ${
+                  !viewMode3D ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                }`}
+              >
+                <Image className="w-3 h-3" />
+                <span>Foto</span>
+              </button>
+            </div>
+
+            <div className="h-8 px-2.5 rounded-full bg-white border border-black/[0.08] font-telemetry text-[11px] flex items-center text-zinc-500">
+              <span className="text-[#111318] font-bold">{String(safeIndex + 1).padStart(2, '0')}</span>
+              <span>/{String(garage.length).padStart(2, '0')}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Editorial AMMO-Style Brand & Model Header */}
+        <div className="flex items-start justify-between gap-3 px-0.5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-4xl font-extrabold tracking-tight text-[#111318] leading-none truncate">
+                {currentCar.brand}
+              </h1>
+              <span className="px-2 py-0.5 rounded-full bg-white border border-black/[0.08] text-[10px] font-telemetry font-semibold text-zinc-600 shrink-0">
+                {currentCar.year || '2024'}
+              </span>
+            </div>
+            <p className="text-base font-medium text-[#6b7280] mt-1 truncate">
+              {currentCar.model || currentCar.name}
+            </p>
+          </div>
+
+          {onDeleteCar ? (
+            <button
+              type="button"
+              onClick={() => {
+                onDeleteCar(currentCar.id);
+                if (safeIndex > 0) setSelectedIndex(safeIndex - 1);
+              }}
+              title="Quitar del Garage"
+              className="h-8 px-2.5 rounded-full bg-white hover:bg-red-50 border border-black/[0.08] hover:border-red-200 text-zinc-500 hover:text-red-600 transition flex items-center gap-1 text-[11px] font-semibold shrink-0"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            onSaveToGarage && (
+              <button
+                type="button"
+                disabled={isSavedCurrent}
+                onClick={() => onSaveToGarage(currentCar)}
+                className={`h-8 px-3 rounded-full text-[11px] font-semibold transition flex items-center gap-1.5 shrink-0 ${
+                  isSavedCurrent
+                    ? 'bg-emerald-600/12 text-emerald-800 border border-emerald-600/25 cursor-default'
+                    : 'bg-[#111318] text-white hover:bg-zinc-800 active:scale-95'
+                }`}
+              >
+                {isSavedCurrent ? <Check className="w-3.5 h-3.5" /> : <Warehouse className="w-3.5 h-3.5" />}
+                <span>{isSavedCurrent ? 'Guardado' : 'Guardar'}</span>
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Borderless White Studio 3D Stage (Zero Platform) */}
+        <div className="relative -mx-3.5 px-2">
+          {garage.length > 1 && (
+            <button
+              type="button"
+              onClick={prevCar}
+              aria-label="Auto anterior"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/90 hover:bg-[#111318] text-[#111318] hover:text-white border border-black/[0.09] shadow-sm flex items-center justify-center transition active:scale-90 backdrop-blur-md"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+          {garage.length > 1 && (
+            <button
+              type="button"
+              onClick={nextCar}
+              aria-label="Siguiente auto"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/90 hover:bg-[#111318] text-[#111318] hover:text-white border border-black/[0.09] shadow-sm flex items-center justify-center transition active:scale-90 backdrop-blur-md"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+
+          {viewMode3D ? (
+            <Car3DViewer
+              car={currentCar}
+              studioTheme="light"
+              paintOverrideHex={activePaintHex}
+            />
+          ) : (
+            <div className="relative h-[280px] flex items-center justify-center px-6">
+              <img
+                src={currentCar.cutoutImage || currentCar.imageUrl || currentCar.image}
+                alt={currentCar.model || currentCar.name}
+                className="max-h-[220px] max-w-full object-contain rounded-2xl drop-shadow-[0_18px_22px_rgba(15,23,42,0.18)]"
+                onError={(e) => {
+                  e.target.src = currentCar.imageUrl || currentCar.image;
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Colours Swatches Row */}
+        <div className="flex items-center justify-between gap-3 bg-white border border-black/[0.07] rounded-2xl px-3.5 py-2.5 shadow-2xs">
+          <span className="text-xs font-bold text-[#111318]">Colores</span>
+          <div className="flex items-center gap-2">
+            {STUDIO_PAINT_SWATCHES.map((sw) => {
+              const active = paintSwatch === sw.id;
+              return (
+                <button
+                  key={sw.id}
+                  type="button"
+                  onClick={() => setPaintSwatch(sw.id)}
+                  title={sw.label}
+                  aria-label={sw.label}
+                  style={sw.hex ? { backgroundColor: sw.hex } : { background: sw.dotStyle }}
+                  className={`w-5 h-5 rounded-full border border-black/15 transition-transform active:scale-90 ${
+                    active ? 'scale-115 ring-2 ring-[#111318] ring-offset-2 ring-offset-white' : 'opacity-80 hover:opacity-100'
+                  }`}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Feature Highlights Grid (AMMO Bottom Strip adapted vertically) */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-sm font-bold text-[#111318]">Feature Highlights</h2>
+            <span className="text-[10px] font-telemetry uppercase tracking-wider text-zinc-500">
+              {currentCar.country || 'Global'} · {currentCar.rarity || 'Showroom'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
+                <Cpu className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Motor</span>
+              </div>
+              <div className="text-xs font-bold text-[#111318] mt-1.5 leading-snug line-clamp-2">
+                {currentCar.engine || 'Motorización de serie'}
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
+                <Zap className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Potencia</span>
+              </div>
+              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
+                {currentCar.hp || 200} <span className="text-xs font-medium text-zinc-500">CV</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
+                <Gauge className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Aceleración</span>
+              </div>
+              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
+                {currentCar.zeroToHundred || 5.2} <span className="text-xs font-medium text-zinc-500">s · 0–100</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
+                <Award className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Vel. Máx</span>
+              </div>
+              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
+                {currentCar.topSpeed || 240} <span className="text-xs font-medium text-zinc-500">km/h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contrast Editorial Highlight Card (like AMMO dark callout) */}
+        {currentCar.funFact && (
+          <div className="rounded-2xl bg-[#18191d] text-white p-3.5 shadow-sm space-y-1">
+            <div className="flex items-center justify-between text-[10px] font-telemetry uppercase tracking-wider text-zinc-400">
+              <span>{currentCar.rarity || 'Ficha Técnica'}</span>
+              <span>{currentCar.color || 'Serie'}</span>
+            </div>
+            <p className="text-xs text-zinc-200 leading-relaxed">
+              {currentCar.funFact}
+            </p>
+          </div>
+        )}
+
+        {/* Light Bay Thumbnails Strip */}
+        <div>
+          <div className="flex items-center justify-between mb-2 px-0.5">
+            <span className="text-[10px] font-telemetry font-bold text-zinc-500 uppercase tracking-widest">
+              Modelos en Showroom
+            </span>
+            <span className="text-[10px] font-telemetry text-zinc-400">
+              {garage.length} {garage.length === 1 ? 'unidad' : 'unidades'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 snap-x scrollbar-none">
+            {garage.map((carItem, idx) => {
+              const isSelected = selectedIndex === idx;
+              return (
+                <button
+                  type="button"
+                  key={carItem.id || idx}
+                  onClick={() => setSelectedIndex(idx)}
+                  className={`flex-shrink-0 w-32 p-2 rounded-2xl border text-left transition-all cursor-pointer snap-start active:scale-[0.97] ${
+                    isSelected
+                      ? 'bg-white border-[#111318] ring-1 ring-[#111318]/20 shadow-sm'
+                      : 'bg-white/80 border-black/[0.07] hover:border-black/20 opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  <div className="h-14 w-full flex items-center justify-center bg-[#f4f5f7] rounded-xl overflow-hidden mb-1.5">
+                    <img
+                      src={carItem.cutoutImage || carItem.imageUrl || carItem.image}
+                      alt={carItem.model || carItem.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-display text-xs font-extrabold uppercase text-[#111318] truncate">
+                      {carItem.brand}
+                    </span>
+                    <span className="font-telemetry text-[9px] text-zinc-500 shrink-0">
+                      {carItem.hp || 0}CV
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-medium text-zinc-500 truncate">
+                    {carItem.model || carItem.name}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto select-none animate-fade-in pb-2">
@@ -151,8 +481,21 @@ export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner,
             </button>
           )}
 
-          <div className="px-2.5 py-1 rounded-lg bg-white text-[#08090c] font-telemetry font-bold text-[10px] uppercase tracking-widest">
-            {selectedBrandTitle ? selectedBrandTitle.toUpperCase() : 'GARAGE // 3D'}
+          <div className="flex items-center gap-2">
+            {onToggleStudioTheme && (
+              <button
+                type="button"
+                onClick={onToggleStudioTheme}
+                className="px-2.5 py-1.5 rounded-xl cl-pill hover:bg-[#232838] text-zinc-200 text-xs font-semibold transition flex items-center gap-1.5 active:scale-[0.97]"
+                title="Cambiar a Studio Blanco"
+              >
+                <Sun className="w-3.5 h-3.5 text-amber-300" />
+                <span>Studio</span>
+              </button>
+            )}
+            <div className="px-2.5 py-1 rounded-lg bg-white text-[#08090c] font-telemetry font-bold text-[10px] uppercase tracking-widest">
+              {selectedBrandTitle ? selectedBrandTitle.toUpperCase() : 'GARAGE // 3D'}
+            </div>
           </div>
         </div>
 
@@ -261,7 +604,7 @@ export default function NfsGarageView({ garage = [], onDeleteCar, onOpenScanner,
 
           {viewMode3D ? (
             <div className="w-full">
-              <Car3DViewer car={currentCar} neonColorHex={activeNeon.hex} />
+              <Car3DViewer car={currentCar} neonColorHex={activeNeon.hex} studioTheme="dark" />
             </div>
           ) : (
             <div className="relative flex flex-col items-center justify-center w-full max-w-lg py-10">

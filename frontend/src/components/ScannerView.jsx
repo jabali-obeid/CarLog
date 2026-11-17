@@ -5,11 +5,12 @@ import CarCard from './CarCard';
 import { sound } from '../utils/audio';
 import { compressImage } from '../utils/imageUtils';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
-import { getCurrentSession } from '../utils/auth';
+import { isCarInSavedSet } from '../utils/auth';
+import { publishRadarSpot, getSavedUserCoords, requestUserLocation } from '../utils/radarService';
 
 const DAILY_SCAN_LIMIT = 15;
 
-export default function ScannerView({ onSaveToGarage, savedCarIds, onBroadcastToRadar, initialPreset }) {
+export default function ScannerView({ onSaveToGarage, savedCarIds, dailySaveStats, onBroadcastToRadar, initialPreset }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [identifiedCar, setIdentifiedCar] = useState(null);
@@ -363,78 +364,41 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
     }
   };
 
-  const handleSave = (car) => {
-    onSaveToGarage(car);
+  const handleSave = async (car) => {
+    const res = await onSaveToGarage(car);
+    if (res?.saved === false) {
+      setToastMessage(res.error || 'No se pudo guardar este auto.');
+      setTimeout(() => setToastMessage(null), 3600);
+      return;
+    }
     setToastMessage(`${car.brand} ${car.model} guardado en tu Garage`);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
   const handleBroadcast = async (car) => {
-    const supabase = getSupabase();
-    const session = getCurrentSession();
-    const spotPayload = {
-      id: `spot-${Date.now()}`,
-      brand: car.brand,
-      model: car.model || car.name || 'Modelo',
-      year: car.year ? String(car.year) : '',
-      rarity: car.rarity || 'Raro',
-      hp: Number(car.hp) || 0,
-      zeroToHundred: Number(car.zeroToHundred) || 0,
-      topSpeed: Number(car.topSpeed) || 0,
-      engine: car.engine || '',
-      color: car.color || '',
-      imageUrl: car.imageUrl || '',
-      spottedBy: session?.username || 'Tú (Spotter Oficial)'
-    };
-
-    if (supabase && isSupabaseConfigured() && session?.provider === 'supabase') {
+    let coords = getSavedUserCoords();
+    if (!coords) {
       try {
-        const { error } = await supabase.from('radar_spots').insert({
-          id: spotPayload.id,
-          user_id: session.id,
-          brand: spotPayload.brand,
-          model: spotPayload.model,
-          year: spotPayload.year,
-          rarity: spotPayload.rarity,
-          hp: spotPayload.hp,
-          zero_to_hundred: spotPayload.zeroToHundred,
-          top_speed: spotPayload.topSpeed,
-          engine: spotPayload.engine,
-          color: spotPayload.color,
-          image_silhouette: spotPayload.imageUrl,
-          spotted_by: spotPayload.spottedBy,
-          address: 'Avistamiento Comunitario',
-          distance_meters: Math.floor(150 + Math.random() * 800)
-        });
-        if (!error) {
-          sound.playRadarPing();
-          setToastMessage(`Alerta enviada al Radar Cloud para ${car.brand} ${car.model}`);
-          setTimeout(() => setToastMessage(null), 4000);
-          return;
-        }
-      } catch (e) {
-        console.warn('Supabase broadcast fallback:', e);
+        coords = await requestUserLocation(3000);
+      } catch {
+        coords = null;
       }
     }
 
-    try {
-      const res = await fetch('/api/radar/spot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(spotPayload)
-      });
-      if (res.ok) {
-        sound.playRadarPing();
-        setToastMessage(`Alerta de proximidad lanzada para ${car.brand} ${car.model}`);
-        setTimeout(() => setToastMessage(null), 4000);
-        return;
-      }
-    } catch (e) {
-      console.warn('Local backend radar unreachable:', e);
-    }
+    const { mode } = await publishRadarSpot({
+      car,
+      coords,
+      address: coords ? 'Ubicación GPS verificada' : 'Avistamiento en calle'
+    });
 
-    setToastMessage('Conecta Supabase o el servidor local para compartir alertas en vivo.');
+    sound.playRadarPing();
+    setToastMessage(
+      mode === 'cloud'
+        ? `Alerta transmitida al Radar Cloud (${coords ? 'GPS activo' : 'zona'}) para ${car.brand} ${car.model}`
+        : `Alerta publicada en tu Radar local para ${car.brand} ${car.model}`
+    );
     setTimeout(() => setToastMessage(null), 4000);
+    if (onBroadcastToRadar) onBroadcastToRadar();
   };
 
   return (
@@ -473,7 +437,20 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {dailySaveStats && (
+              <span
+                className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${
+                  dailySaveStats.remaining === 0
+                    ? 'bg-red-500/12 border-red-500/35 text-red-300'
+                    : dailySaveStats.remaining <= 2
+                      ? 'bg-amber-500/12 border-amber-500/35 text-amber-300'
+                      : 'cl-panel text-zinc-300'
+                }`}
+              >
+                Guardados: {dailySaveStats.used}/{dailySaveStats.limit}
+              </span>
+            )}
             {hasCustomKey ? (
               <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-telemetry text-emerald-300 font-semibold uppercase">
                 API Propia · Ilimitado
@@ -486,7 +463,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
                     : 'cl-panel text-zinc-300'
                 }`}
               >
-                Hoy: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
+                Escaneos: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
               </span>
             ) : (
               <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-zinc-400 font-telemetry uppercase">
@@ -682,7 +659,8 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
           <CarCard
             car={identifiedCar}
             onSave={handleSave}
-            isSaved={savedCarIds.has(identifiedCar.id || `${identifiedCar.brand}-${identifiedCar.model}`)}
+            isSaved={isCarInSavedSet(identifiedCar, savedCarIds)}
+            dailyLimitReached={Boolean(dailySaveStats && dailySaveStats.remaining <= 0)}
             onBroadcast={handleBroadcast}
           />
         </div>

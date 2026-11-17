@@ -7,7 +7,9 @@ import {
   getUserGarage,
   saveCarForUser,
   deleteCarForUser,
-  syncGuestCarsToUser
+  syncGuestCarsToUser,
+  getCarIdentityKey,
+  getDailySaveStats
 } from './utils/auth';
 import { getSupabase, isSupabaseConfigured } from './utils/supabaseClient';
 
@@ -58,6 +60,8 @@ export default function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [radarSelectedPreset, setRadarSelectedPreset] = useState(null);
+  const [garageStudioTheme, setGarageStudioTheme] = useState('light');
+  const [saveNotice, setSaveNotice] = useState(null);
 
   // Resolve initial Supabase/local session and subscribe to auth updates
   useEffect(() => {
@@ -167,6 +171,13 @@ export default function App() {
     }
   };
 
+  const showSaveNotice = (message, tone = 'warn') => {
+    setSaveNotice({ message, tone });
+    setTimeout(() => {
+      setSaveNotice((prev) => (prev?.message === message ? null : prev));
+    }, 3600);
+  };
+
   const handleSaveToGarage = async (car) => {
     const newCar = {
       ...car,
@@ -176,13 +187,21 @@ export default function App() {
       topSpeed: parseInt(car.topSpeed, 10) || 0,
       imageUrl: car.imageUrl || car.image || '',
       funFact: car.funFact || car.description || '',
-      capturedAt: car.capturedAt || new Date().toISOString(),
+      capturedAt: new Date().toISOString(),
       userCaptured: true
     };
 
     const userId = currentUser ? currentUser.id : null;
-    const { updatedList } = await saveCarForUser(userId, newCar, garage);
-    setGarage(updatedList);
+    const result = await saveCarForUser(userId, newCar, garage);
+    if (!result?.saved) {
+      if (result?.error) {
+        showSaveNotice(result.error, 'warn');
+      }
+      return result;
+    }
+
+    setGarage(result.updatedList);
+    return result;
   };
 
   const handleDeleteFromGarage = async (carId) => {
@@ -227,9 +246,15 @@ export default function App() {
 
   const savedCarIds = new Set(
     garage
-      .flatMap((c) => [c.id, c.brand && (c.model || c.name) ? `${c.brand}-${c.model || c.name}` : null])
+      .flatMap((c) => [
+        c.id,
+        c.brand && (c.model || c.name) ? `${c.brand}-${c.model || c.name}` : null,
+        getCarIdentityKey(c)
+      ])
       .filter(Boolean)
   );
+
+  const dailySaveStats = getDailySaveStats(currentUser ? currentUser.id : null, garage);
 
   // Render Garage (Personal Collection or 3D Showroom Catalog)
   const renderGarageContent = () => {
@@ -294,6 +319,10 @@ export default function App() {
           }}
           onDeleteCar={!showroomMode ? handleDeleteFromGarage : undefined}
           onOpenScanner={() => setActiveTab('scanner')}
+          studioTheme={garageStudioTheme}
+          onToggleStudioTheme={() => setGarageStudioTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+          onSaveToGarage={handleSaveToGarage}
+          savedIds={savedCarIds}
         />
       </Suspense>
     );
@@ -301,6 +330,15 @@ export default function App() {
 
   return (
     <div className="min-h-[100dvh] bg-[var(--cl-canvas)] text-[var(--cl-text-primary)] flex flex-col justify-center items-center">
+      {saveNotice && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2.5 rounded-2xl bg-[#181214]/95 text-amber-200 font-semibold text-xs shadow-2xl border border-amber-500/40 backdrop-blur-xl max-w-[92vw] text-center animate-fade-in"
+        >
+          {saveNotice.message}
+        </div>
+      )}
       <MobileContainer
         activeTab={activeTab}
         onTabChange={(tab) => {
@@ -321,13 +359,14 @@ export default function App() {
         showroomCars={showroomCars}
         showroomLoading={showroomLoading}
         onOpenCarIn3D={handleOpenCarIn3D}
-        isGarageShowroom={showroomMode && selectedBrand === null}
+        isGarageShowroom={(showroomMode && selectedBrand === null) || (selectedBrand !== null && garageStudioTheme === 'light')}
         renderGarageContent={renderGarageContent}
         renderScannerContent={() => (
           <Suspense fallback={<ViewFallback />}>
             <ScannerView
               onSaveToGarage={handleSaveToGarage}
               savedCarIds={savedCarIds}
+              dailySaveStats={dailySaveStats}
               onBroadcastToRadar={() => setActiveTab('radar')}
               initialPreset={radarSelectedPreset}
             />
@@ -335,7 +374,7 @@ export default function App() {
         )}
         renderRadarContent={() => (
           <Suspense fallback={<ViewFallback />}>
-            <RadarView onSpotFound={handleSpotFromRadar} />
+            <RadarView onSpotFound={handleSpotFromRadar} savedCarIds={savedCarIds} />
           </Suspense>
         )}
         renderProfileContent={() => (

@@ -2,10 +2,12 @@ import React from 'react';
 import { Volume2, Zap, Gauge, Award, Fuel, Sparkles, MapPin, Palette, Info, Check } from 'lucide-react';
 import { RARITY_CONFIG } from '../utils/demoData';
 import { sound } from '../utils/audio';
+import { getCarRarityScore } from '../utils/carScore';
 
-export default function CarCard({ car, onSave, isSaved, onBroadcast, onRevEngine }) {
+export default function CarCard({ car, onSave, isSaved, dailyLimitReached = false, onBroadcast, onRevEngine }) {
   const rarity = car?.rarity || 'Común';
   const config = RARITY_CONFIG[rarity] || RARITY_CONFIG['Común'];
+  const rarityScore = getCarRarityScore(car);
 
   const handleRev = (e) => {
     e.stopPropagation();
@@ -24,6 +26,9 @@ export default function CarCard({ car, onSave, isSaved, onBroadcast, onRevEngine
           <div className="flex items-center gap-2 min-w-0">
             <span className={`text-[10px] font-telemetry uppercase px-2 py-0.5 rounded-md tracking-wider ${config.bgBadge}`}>
               {config.badge}
+            </span>
+            <span className="text-[10px] font-telemetry font-bold px-2 py-0.5 rounded-md bg-white/[0.08] text-white border border-white/15 shrink-0">
+              {rarityScore}/100
             </span>
             <span className="text-[11px] font-telemetry text-zinc-400 truncate">
               {car.country || 'Origen Global'}
@@ -137,13 +142,20 @@ export default function CarCard({ car, onSave, isSaved, onBroadcast, onRevEngine
                 className={`w-full min-h-[42px] py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
                   isSaved
                     ? 'bg-emerald-500/12 border border-emerald-500/35 text-emerald-300 cursor-default'
-                    : 'bg-red-600 hover:bg-red-500 text-white shadow-[0_8px_20px_rgba(220,38,38,0.28)]'
+                    : dailyLimitReached
+                      ? 'bg-zinc-800 border border-zinc-700 text-amber-300 hover:bg-zinc-700'
+                      : 'bg-red-600 hover:bg-red-500 text-white shadow-[0_8px_20px_rgba(220,38,38,0.28)]'
                 }`}
               >
                 {isSaved ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-400" />
-                    <span>En tu Garage Coleccionista</span>
+                    <span>En tu Garage (sin repetir)</span>
+                  </>
+                ) : dailyLimitReached ? (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Cupo diario completo (5/5 guardados hoy)</span>
                   </>
                 ) : (
                   <>

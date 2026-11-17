@@ -259,7 +259,115 @@ export async function logoutUser() {
   }
 }
 
-// --- Garage Persistence (Supabase Cloud + IndexedDB Offline Cache) ---
+// --- Garage Persistence, Deduplication & Daily Save Cap ---
+
+export const DAILY_SAVE_LIMIT = 5;
+
+export function normalizeCarToken(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+export function getCarIdentityKey(car) {
+  if (!car) return '';
+  const brand = normalizeCarToken(car.brand || '');
+  let model = normalizeCarToken(car.model || car.name || '');
+  if (brand && model.startsWith(`${brand} `)) {
+    model = model.slice(brand.length + 1).trim();
+  }
+  if (!brand && !model) return String(car.id || '');
+  return `${brand}::${model}`;
+}
+
+export function isDuplicateCar(car, list = []) {
+  if (!car || !Array.isArray(list)) return false;
+  const targetId = car.id ? String(car.id) : '';
+  const targetKey = getCarIdentityKey(car);
+  return list.some((c) => {
+    if (!c) return false;
+    if (targetId && c.id && String(c.id) === targetId) return true;
+    const existingKey = getCarIdentityKey(c);
+    return Boolean(targetKey && existingKey && existingKey === targetKey);
+  });
+}
+
+export function isCarInSavedSet(car, savedIds) {
+  if (!car || !(savedIds instanceof Set)) return false;
+  const key = getCarIdentityKey(car);
+  return (
+    (car.id && savedIds.has(car.id)) ||
+    savedIds.has(`${car.brand}-${car.model || car.name}`) ||
+    Boolean(key && savedIds.has(key))
+  );
+}
+
+export function dedupeCarList(list = []) {
+  if (!Array.isArray(list)) return [];
+  const seenIds = new Set();
+  const seenKeys = new Set();
+  const result = [];
+  for (const car of list) {
+    if (!car) continue;
+    const id = car.id ? String(car.id) : '';
+    const key = getCarIdentityKey(car);
+    if ((id && seenIds.has(id)) || (key && seenKeys.has(key))) continue;
+    if (id) seenIds.add(id);
+    if (key) seenKeys.add(key);
+    result.push(car);
+  }
+  return result;
+}
+
+function getLocalDateKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getDailySaveStorageKey(userId, dateKey = getLocalDateKey()) {
+  return `carlog_daily_saves_${userId || 'guest'}_${dateKey}`;
+}
+
+export function getDailySaveStats(userId, currentList = []) {
+  const todayKey = getLocalDateKey();
+  const capturedTodayCount = Array.isArray(currentList)
+    ? currentList.filter((c) => {
+        if (!c?.capturedAt || c.userCaptured === false) return false;
+        const parsed = new Date(c.capturedAt);
+        return !Number.isNaN(parsed.getTime()) && getLocalDateKey(parsed) === todayKey;
+      }).length
+    : 0;
+
+  let storedCount = 0;
+  try {
+    storedCount = parseInt(localStorage.getItem(getDailySaveStorageKey(userId, todayKey)) || '0', 10) || 0;
+  } catch {
+    storedCount = 0;
+  }
+
+  const used = Math.max(capturedTodayCount, storedCount);
+  return {
+    limit: DAILY_SAVE_LIMIT,
+    used,
+    remaining: Math.max(0, DAILY_SAVE_LIMIT - used),
+    dateKey: todayKey
+  };
+}
+
+function recordDailySave(userId, currentStats) {
+  const todayKey = currentStats?.dateKey || getLocalDateKey();
+  const nextCount = (currentStats?.used || 0) + 1;
+  try {
+    localStorage.setItem(getDailySaveStorageKey(userId, todayKey), String(nextCount));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
 
 export async function getUserGarage(userId) {
   const supabase = getSupabase();
@@ -272,7 +380,7 @@ export async function getUserGarage(userId) {
         .order('captured_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        const cars = data.map(normalizeDbToCar);
+        const cars = dedupeCarList(data.map(normalizeDbToCar));
         await idbSaveGarage(userId, cars);
         return cars;
       }
@@ -281,10 +389,30 @@ export async function getUserGarage(userId) {
     }
   }
 
-  return await idbGetGarage(userId);
+  return dedupeCarList(await idbGetGarage(userId));
 }
 
-export async function saveCarForUser(userId, car, currentList) {
+export async function saveCarForUser(userId, car, currentList = []) {
+  if (isDuplicateCar(car, currentList)) {
+    return {
+      saved: false,
+      reason: 'duplicate',
+      error: `${car.brand || 'Este'} ${car.model || car.name || 'auto'} ya está en tu Garage.`,
+      updatedList: currentList
+    };
+  }
+
+  const saveStats = getDailySaveStats(userId, currentList);
+  if (saveStats.used >= DAILY_SAVE_LIMIT) {
+    return {
+      saved: false,
+      reason: 'daily_limit',
+      error: `Alcanzaste el límite de ${DAILY_SAVE_LIMIT} autos guardados por hoy. Volvé mañana.`,
+      updatedList: currentList,
+      saveQuota: saveStats
+    };
+  }
+
   let finalCar = { ...car, userCaptured: true };
   const supabase = getSupabase();
 
@@ -321,7 +449,13 @@ export async function saveCarForUser(userId, car, currentList) {
 
   const updated = [finalCar, ...currentList.filter(c => c.id !== finalCar.id)];
   await idbSaveGarage(userId, updated);
-  return { savedCar: finalCar, updatedList: updated };
+  recordDailySave(userId, saveStats);
+  return {
+    saved: true,
+    savedCar: finalCar,
+    updatedList: updated,
+    saveQuota: getDailySaveStats(userId, updated)
+  };
 }
 
 export async function deleteCarForUser(userId, carId, currentList) {
@@ -351,13 +485,14 @@ export async function syncGuestCarsToUser(userId) {
   if (customGuestCars.length === 0) return [];
 
   const existingUserCars = (await getUserGarage(userId)) || [];
-  const existingIds = new Set(existingUserCars.map(c => c.id));
   let merged = [...existingUserCars];
 
   for (const guestCar of customGuestCars) {
-    if (!existingIds.has(guestCar.id)) {
-      const { updatedList } = await saveCarForUser(userId, guestCar, merged);
-      merged = updatedList;
+    if (!isDuplicateCar(guestCar, merged)) {
+      const result = await saveCarForUser(userId, guestCar, merged);
+      if (result?.saved && Array.isArray(result.updatedList)) {
+        merged = result.updatedList;
+      }
     }
   }
 

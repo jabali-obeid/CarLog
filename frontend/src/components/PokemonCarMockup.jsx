@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { POKEDEX_CARS } from '../utils/demoData';
 import { sound } from '../utils/audio';
+import { isCarInSavedSet } from '../utils/auth';
 
 export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToGarage, savedIds = new Set() }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,7 +14,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
   const [toast, setToast] = useState(null);
 
   const car = POKEDEX_CARS[currentIndex];
-  const isSaved = savedIds.has(car.id) || savedIds.has(`${car.brand}-${car.name}`);
+  const isSaved = isCarInSavedSet(car, savedIds);
   const isLiked = likedCars.has(car.id);
 
   const nextCar = () => {

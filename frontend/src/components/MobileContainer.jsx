@@ -4,7 +4,7 @@ import {
   BookOpen, Smartphone, Flame, User, LogOut
 } from 'lucide-react';
 import { POKEDEX_CARS } from '../utils/demoData';
-import ShowroomGallery from './ShowroomGallery';
+import WeeklyFindsFeed from './WeeklyFindsFeed';
 import FluidBottomDock from './FluidBottomDock';
 
 const CATALOG_ALIAS_IDS = new Set([
@@ -86,11 +86,11 @@ export default function MobileContainer({
     return [...featured, ...extras];
   }, [showroomCars]);
 
-  const handleCapture = (targetCar) => {
+  const handleCapture = async (targetCar) => {
     const selected = targetCar || showcaseCars[0];
     if (!selected) return;
     const modelName = selected.model || selected.name || 'Modelo';
-    onSaveToGarage({
+    const res = await onSaveToGarage({
       id: selected.id,
       brand: selected.brand,
       model: modelName,
@@ -104,6 +104,11 @@ export default function MobileContainer({
       imageUrl: selected.imageUrl || selected.image,
       funFact: selected.funFact || selected.description
     });
+    if (res?.saved === false) {
+      setToast(res.error || `${selected.brand} ${modelName} ya está en tu Garage`);
+      setTimeout(() => setToast(null), 3400);
+      return;
+    }
     setToast(`${selected.brand} ${modelName} guardado en tu Garage`);
     setTimeout(() => setToast(null), 3000);
   };
@@ -111,7 +116,7 @@ export default function MobileContainer({
   const isLightView = activeTab === 'cardex' || (activeTab === 'garage' && isGarageShowroom);
 
   const navItems = [
-    { id: 'cardex', label: 'CarLog', icon: Flame },
+    { id: 'cardex', label: 'Hallazgos', icon: Flame },
     { id: 'garage', label: 'Garage', icon: BookOpen, badge: garage.length > 0 ? garage.length : null },
     { id: 'scanner', label: 'Escanear', icon: Camera, primary: true },
     { id: 'radar', label: 'Radar', icon: Radio },
@@ -277,15 +282,14 @@ export default function MobileContainer({
 
         {/* Dynamic App Tab Body */}
         <main className="relative z-20 flex-1 flex flex-col overflow-hidden">
-          {/* TAB 1: LIGHT STUDIO SHOWROOM */}
+          {/* TAB 1: WEEKLY TOP RARE FINDS (HALLAZGOS DE LA SEMANA) */}
           {activeTab === 'cardex' && (
             <div className="flex-1 overflow-y-auto pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
-              <ShowroomGallery
+              <WeeklyFindsFeed
                 cars={showcaseCars}
                 savedIds={savedIds}
                 onSaveToGarage={handleCapture}
                 onOpenIn3D={onOpenCarIn3D}
-                title="En Showroom"
                 loadingCatalog={showroomLoading}
               />
             </div>
