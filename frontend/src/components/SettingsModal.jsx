@@ -8,8 +8,8 @@ export default function SettingsModal({ isOpen, onClose, onSettingsSaved }) {
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
-    setApiKey(localStorage.getItem('cardex_gemini_key') || '');
-    setTripoKey(localStorage.getItem('cardex_tripo_key') || '');
+    setApiKey(localStorage.getItem('carlog_gemini_key') || '');
+    setTripoKey(localStorage.getItem('carlog_tripo_key') || '');
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -17,8 +17,8 @@ export default function SettingsModal({ isOpen, onClose, onSettingsSaved }) {
   const cloudActive = isSupabaseConfigured();
 
   const handleSave = () => {
-    localStorage.setItem('cardex_gemini_key', apiKey.trim());
-    localStorage.setItem('cardex_tripo_key', tripoKey.trim());
+    localStorage.setItem('carlog_gemini_key', apiKey.trim());
+    localStorage.setItem('carlog_tripo_key', tripoKey.trim());
     setSavedSuccess(true);
     if (onSettingsSaved) onSettingsSaved();
     setTimeout(() => {

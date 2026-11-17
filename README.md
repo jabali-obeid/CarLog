@@ -1,6 +1,6 @@
-# 🏎️ CarDex — El Pokédex de Autos del Mundo Real
+# 🏎️ CarLog — El Pokédex de Autos del Mundo Real
 
-**CarDex** es una aplicación de coleccionismo urbano de autos inspirada en el fenómeno de *Pokémon Go* y la cultura del *Car Spotting*.
+**CarLog** es una aplicación de coleccionismo urbano de autos inspirada en el fenómeno de *Pokémon Go* y la cultura del *Car Spotting*.
 
 ---
 
@@ -41,7 +41,7 @@ El servidor ya está ejecutándose en:
 
 Para volver a iniciarlo en cualquier momento:
 ```bash
-cd "C:\Users\Jabali\.gemini\antigravity\scratch\cardex"
+cd "C:\Users\Jabali\.gemini\antigravity\scratch\carlog"
 node backend/server.js
 ```
 

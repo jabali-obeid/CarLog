@@ -53,7 +53,7 @@ export default function MobileContainer({
   };
 
   const navItems = [
-    { id: 'cardex', label: 'HOT', icon: Flame },
+    { id: 'carlog', label: 'HOT', icon: Flame },
     { id: 'garage', label: 'Garage', icon: BookOpen, badge: garage.length > 0 ? garage.length : null },
     { id: 'scanner', label: 'Escanear', icon: Camera, primary: true },
     { id: 'radar', label: 'Radar', icon: Radio },
@@ -148,7 +148,7 @@ export default function MobileContainer({
         {/* Dynamic App Tab Body (Unified White & Red Palette) */}
         <main className="relative z-20 flex-1 flex flex-col overflow-hidden bg-[#f4f5f7]">
           {/* TAB 1: HOT WEEKLY REAL FINDS */}
-          {activeTab === 'cardex' && (
+          {activeTab === 'carlog' && (
             <div className="flex-1 overflow-y-auto pb-8 bg-[#f4f5f7] text-[#111318] scrollbar-none">
               <WeeklyFindsFeed
                 savedIds={savedIds}

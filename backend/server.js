@@ -442,7 +442,7 @@ app.post('/api/identify', rateLimitIdentify, async (req, res) => {
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
     const prompt = `
-Eres un perito automotriz de la aplicación 'CarDex'.
+Eres un perito automotriz de la aplicación 'CarLog'.
 Analiza la imagen adjunta.
 
 REGLA CRÍTICA 1:
@@ -743,7 +743,7 @@ app.post('/api/generate-3d', async (req, res) => {
 
     return res.json({
       success: true,
-      provider: assignedGlb ? 'CarDex-Asset-Library' : 'CarDex-Procedural-Engine',
+      provider: assignedGlb ? 'CarLog-Asset-Library' : 'CarLog-Procedural-Engine',
       status: 'ready',
       model3dUrl: assignedGlb,
       notice: assignedGlb 
@@ -768,7 +768,7 @@ if (fs.existsSync(FRONTEND_DIST)) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 CarDex Server (NHTSA vPIC & PWA Ready)`);
+  console.log(`🚀 CarLog Server (NHTSA vPIC & PWA Ready)`);
   console.log(`   - Local PC:   http://localhost:${PORT}`);
   console.log(`   - Tu Celular: http://192.168.1.213:${PORT}`);
 });

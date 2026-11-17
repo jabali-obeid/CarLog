@@ -1,7 +1,7 @@
 {
-  "name": "cardex-backend",
+  "name": "carlog-backend",
   "version": "1.0.0",
-  "description": "Backend API for CarDex - Car Spotting & Collecting App",
+  "description": "Backend API for CarLog - Car Spotting & Collecting App",
   "main": "server.js",
   "type": "module",
   "scripts": {

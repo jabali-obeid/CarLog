@@ -107,7 +107,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
           </div>
         </div>
 
-        {/* Top Navigation Bar: < CarDex (wheel icon) */}
+        {/* Top Navigation Bar: < CarLog (wheel icon) */}
         <div className="relative z-30 px-3 py-2 flex items-center justify-between text-white">
           <button 
             onClick={prevCar}
@@ -117,7 +117,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
             <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
           </button>
 
-          {/* Pokémon-Style CarDex Brand Logo */}
+          {/* Pokémon-Style CarLog Brand Logo */}
           <div className="flex items-center gap-1">
             <span className="font-black text-2xl tracking-tighter italic text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
               Car<span className="text-white">Dex</span>
@@ -126,7 +126,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
 
           {/* Automotive Racing Wheel / Tachometer Icon (No Pokeball) */}
           <button 
-            title="Tacómetro CarDex"
+            title="Tacómetro CarLog"
             className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 shadow-lg flex items-center justify-center text-amber-400 active:scale-95 transition-transform"
           >
             <Gauge className="w-5 h-5 text-amber-400" />
@@ -303,7 +303,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
           </div>
         )}
 
-        {/* Bottom App Bar (Pokédex, CarDex Center, Heart, Settings) */}
+        {/* Bottom App Bar (Pokédex, CarLog Center, Heart, Settings) */}
         <div className="relative z-30 pt-3 pb-2 px-6 bg-white/95 backdrop-blur-md rounded-b-[42px] -mx-4 -mb-4 border-t border-zinc-200/80 flex items-center justify-between text-zinc-400">
           {/* Pokédex / Garage Icon */}
           <button 
@@ -315,7 +315,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
             <span className="text-[9px] font-semibold">Radar</span>
           </button>
 
-          {/* Center Brand Icon: Active CarDex */}
+          {/* Center Brand Icon: Active CarLog */}
           <button 
             onClick={() => setActiveSheet(activeSheet === 'about' ? 'hero' : 'about')}
             className="flex flex-col items-center gap-0.5 text-zinc-900"
@@ -324,7 +324,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
               🏎️
             </div>
             <span className="text-[10px] font-black tracking-tight -mt-1 text-zinc-900">
-              CarDex
+              CarLog
             </span>
           </button>
 

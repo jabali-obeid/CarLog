@@ -1,7 +1,7 @@
 {
-  "name": "cardex-root",
+  "name": "carlog-root",
   "version": "1.0.0",
-  "description": "CarDex - Car Spotting & Collecting App (Pokémon de Autos)",
+  "description": "CarLog - Car Spotting & Collecting App (Pokémon de Autos)",
   "scripts": {
     "start": "node backend/server.js",
     "dev:backend": "cd backend && node --watch server.js",

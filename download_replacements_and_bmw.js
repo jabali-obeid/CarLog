@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const token = 'aca9d0f2b5f844e4ae335643f64a665d';
-const targetDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\cardex\\frontend\\public\\models';
-const distDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\cardex\\frontend\\dist\\models';
+const targetDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\carlog\\frontend\\public\\models';
+const distDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\carlog\\frontend\\dist\\models';
 
 const items = [
   // Clean replacements for the reported broken models

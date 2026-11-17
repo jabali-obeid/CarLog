@@ -58,7 +58,7 @@ export default function NfsGarageView({
     if (!currentCar) return;
     setGenerating3D(true);
     try {
-      const tripoApiKey = localStorage.getItem('cardex_tripo_key') || '';
+      const tripoApiKey = localStorage.getItem('carlog_tripo_key') || '';
       const res = await fetch('/api/generate-3d', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

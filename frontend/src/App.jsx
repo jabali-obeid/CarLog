@@ -46,7 +46,7 @@ function ViewFallback() {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('cardex'); // 'cardex' | 'garage' | 'scanner' | 'radar' | 'profile'
+  const [activeTab, setActiveTab] = useState('carlog'); // 'carlog' | 'garage' | 'scanner' | 'radar' | 'profile'
   const [garage, setGarage] = useState([]);
   const [showroomMode, setShowroomMode] = useState(false);
   const [showroomCars, setShowroomCars] = useState([]);
@@ -129,7 +129,7 @@ export default function App() {
   }, [showroomCars]);
 
   useEffect(() => {
-    if ((activeTab === 'cardex' || showroomMode) && showroomCars.length === 0) {
+    if ((activeTab === 'carlog' || showroomMode) && showroomCars.length === 0) {
       let cancelled = false;
       fetch('/data/showroom_catalog.json')
         .then((res) => (res.ok ? res.json() : null))

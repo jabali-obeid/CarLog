@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const token = 'aca9d0f2b5f844e4ae335643f64a665d';
-const targetDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\cardex\\frontend\\public\\models';
-const distDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\cardex\\frontend\\dist\\models';
+const targetDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\carlog\\frontend\\public\\models';
+const distDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\carlog\\frontend\\dist\\models';
 
 const batch = [
   { name: 'vw_gol.glb', uid: '156c3f4dd90146b7914df1ce33046420' },

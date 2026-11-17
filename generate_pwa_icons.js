@@ -114,7 +114,7 @@ function generatePngIcon(size, filename, isMaskable = false) {
   console.log(`Generated ${path.basename(filename)} (${size}x${size}, ${png.length} bytes)`);
 }
 
-const outDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\cardex\\frontend\\public\\icons';
+const outDir = 'C:\\Users\\Jabali\\.gemini\\antigravity\\scratch\\carlog\\frontend\\public\\icons';
 
 generatePngIcon(192, path.join(outDir, 'icon-192.png'), false);
 generatePngIcon(512, path.join(outDir, 'icon-512.png'), false);
@@ -144,7 +144,7 @@ const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" w
   <circle cx="256" cy="256" r="195" fill="none" stroke="#EF4444" stroke-width="20" stroke-dasharray="240 1200" stroke-dashoffset="-640" stroke-linecap="round" transform="rotate(135 256 256)"/>
   <!-- RPM Numbers -->
   <text x="256" y="160" text-anchor="middle" fill="#06B6D4" font-family="monospace" font-size="28" font-weight="900" letter-spacing="4">RPM x1000</text>
-  <text x="256" y="380" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-weight="900" font-size="36" letter-spacing="6">CARDEX</text>
+  <text x="256" y="380" text-anchor="middle" fill="#FFFFFF" font-family="sans-serif" font-weight="900" font-size="36" letter-spacing="6">CARLOG</text>
   <!-- Needle -->
   <line x1="256" y1="256" x2="380" y2="150" stroke="url(#needleGrad)" stroke-width="12" stroke-linecap="round"/>
   <!-- Center Cap -->
