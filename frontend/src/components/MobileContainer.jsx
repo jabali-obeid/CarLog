@@ -84,11 +84,11 @@ export default function MobileContainer({
         {/* Clean White Top App Bar with Official Logo */}
         <header className="relative z-30 pt-[max(0.75rem,var(--sat))] pb-2.5 px-4 sm:px-5 flex items-center justify-between border-b border-black/[0.07] bg-white/95 backdrop-blur-xl text-[#111318]">
           <div className="flex items-center gap-2.5">
-            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm border border-black/[0.08] bg-black shrink-0">
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-sm border border-red-700/20 bg-red-600 p-1.5 flex items-center justify-center shrink-0">
               <img
                 src="/logo.png"
                 alt="CarLog"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
             <div>

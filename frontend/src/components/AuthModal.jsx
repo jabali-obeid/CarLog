@@ -61,8 +61,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         </button>
 
         <div className="text-center space-y-1.5">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto shadow-md border border-black/[0.08] bg-black">
-            <img src="/logo.png" alt="CarLog" className="w-full h-full object-cover" />
+          <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto shadow-md border border-red-700/20 bg-red-600 p-2.5 flex items-center justify-center">
+            <img src="/logo.png" alt="CarLog" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-xl font-black text-[#111318] tracking-tight mt-2">
             {isRegister ? 'Crear Cuenta CarLog' : 'Iniciar Sesión'}
