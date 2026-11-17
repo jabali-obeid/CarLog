@@ -4,6 +4,14 @@
 @source not "../netlify";
 @source not "../public/models";
 
+@font-face {
+  font-family: 'Ethnocentric';
+  src: url('/fonts/ethnocentric-rg.woff') format('woff');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-display: 'Barlow Condensed', system-ui, -apple-system, sans-serif;
   --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -80,6 +88,13 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "zero" 1;
+  }
+
+  /* CarLog Brand Display Typography (Ethnocentric) */
+  .font-ethnocentric {
+    font-family: 'Ethnocentric', var(--font-display), sans-serif;
+    font-style: italic;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Showroom Surfaces & Light Motorsport Panels */

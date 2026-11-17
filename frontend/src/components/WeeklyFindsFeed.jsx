@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Box, Check, MapPin, UserCheck, Flame, Sparkles, Camera, Radio } from 'lucide-react';
+import { Search, Check, MapPin, UserCheck, Flame, Sparkles, Camera, Radio } from 'lucide-react';
 import { getCarRarityScore, getScoreTheme } from '../utils/carScore';
 import { isCarInSavedSet, getCarIdentityKey } from '../utils/auth';
 import { fetchWeeklyRealFinds } from '../utils/radarService';
@@ -10,125 +10,85 @@ const FILTER_TABS = [
   { id: 'classics', label: 'Clásicos' }
 ];
 
-function BubbleFindCard({ car, rank, isSaved, onOpenIn3D, onOpenScanner }) {
+function BubbleFindCard({ car, rank, isSaved, onOpenIn3D }) {
   const [imgFailed, setImgFailed] = useState(false);
   const modelName = car.model || car.name || 'Modelo';
   const score = car._score;
   const theme = getScoreTheme(score);
-  const clampedPct = Math.max(4, Math.min(100, score));
-  const remainingTo100 = Math.max(0, 100 - score);
   const thumbSrc = !imgFailed ? (car.cutoutImage || car.imageUrl || car.image) : '';
 
   return (
-    <article className="rounded-[26px] shadow-[0_20px_42px_-16px_rgba(15,23,42,0.28)] overflow-hidden transition-transform duration-300 hover:-translate-y-0.5">
-      {/* Top White Bubble Header */}
-      <div className="relative z-10 bg-white rounded-b-[20px] p-3.5 sm:p-4 shadow-[0_8px_20px_rgba(15,23,42,0.06)]">
-        <div className="flex items-start gap-3">
-          {/* Square Vehicle Thumbnail */}
-          <div className="w-16 h-16 sm:w-[74px] sm:h-[74px] rounded-2xl bg-[#f1f2f5] border border-black/[0.06] overflow-hidden shrink-0 flex items-center justify-center">
-            {thumbSrc ? (
-              <img
-                src={thumbSrc}
-                alt={`${car.brand} ${modelName}`}
-                loading="lazy"
-                onError={() => setImgFailed(true)}
-                className={`w-full h-full ${car.cutoutImage ? 'object-contain p-1' : 'object-cover'}`}
-              />
-            ) : (
-              <span className="font-display font-extrabold text-sm text-slate-400 uppercase tracking-tight">
-                {(car.brand || 'CL').slice(0, 3)}
+    <article
+      onClick={() => onOpenIn3D && onOpenIn3D(car)}
+      className="rounded-[22px] bg-white border border-black/[0.07] shadow-[0_14px_30px_-14px_rgba(15,23,42,0.16)] p-3.5 sm:p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 active:scale-[0.99]"
+    >
+      <div className="flex items-center justify-between gap-3">
+        {/* Left: Square Rounded Car Photo */}
+        <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-[#f1f2f5] border border-black/[0.06] overflow-hidden shrink-0 flex items-center justify-center">
+          {thumbSrc ? (
+            <img
+              src={thumbSrc}
+              alt={`${car.brand} ${modelName}`}
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+              className={`w-full h-full ${car.cutoutImage ? 'object-contain p-1' : 'object-cover'}`}
+            />
+          ) : (
+            <span className="font-ethnocentric text-xs text-red-600 uppercase">
+              {(car.brand || 'CL').slice(0, 3)}
+            </span>
+          )}
+        </div>
+
+        {/* Middle: Spotter + Location, Title, Rarity */}
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-medium text-[#7c8492] flex items-center gap-1 truncate">
+            <UserCheck className="w-3 h-3 text-slate-400 shrink-0" />
+            <span className="truncate">{car.spottedBy || 'Spotter'}</span>
+            <span className="text-slate-300">·</span>
+            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+            <span className="truncate">{car.location || 'Calle'}</span>
+          </div>
+
+          <h3 className="font-sans font-bold text-[15px] sm:text-[17px] text-[#111318] tracking-tight leading-snug truncate mt-0.5">
+            {car.brand} {modelName} {car.year ? car.year : ''}
+          </h3>
+
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[12px] font-semibold text-red-600 truncate">
+              {car.rarity || theme.tierLabel}
+            </span>
+            {car.hp > 0 && (
+              <span className="text-[10px] font-telemetry text-slate-400 shrink-0">
+                {car.hp} CV
               </span>
             )}
           </div>
-
-          {/* Finder, Title & Score Value */}
-          <div className="flex-1 min-w-0 pt-0.5">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium text-[#7c8492] truncate flex items-center gap-1">
-                <UserCheck className="w-3 h-3 text-slate-400 shrink-0" />
-                <span className="truncate">{car.spottedBy || 'Spotter'}</span>
-              </span>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide shrink-0 ${theme.pillClass}`}>
-                #{rank} · {theme.pillLabel}
-              </span>
-            </div>
-
-            <h3 className="font-sans font-bold text-[16px] sm:text-[18px] text-[#111318] tracking-tight leading-snug truncate mt-0.5">
-              {car.brand} {modelName} {car.year ? car.year : ''}
-            </h3>
-
-            <div className="flex items-center justify-between gap-2 mt-0.5">
-              <span className={`text-[13px] font-bold ${theme.accentText}`}>
-                Índice {score} / 100 · {car.rarity || theme.tierLabel}
-              </span>
-            </div>
-
-            <div className="text-[11px] text-[#64748b] flex items-center gap-1 mt-1 truncate">
-              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-              <span className="truncate">{car.location || 'Avistamiento en calle'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Rich Gradient Bubble Body */}
-      <div className={`-mt-4 pt-7 px-4 pb-4 text-white bg-gradient-to-br ${theme.gradient}`}>
-        <div className="text-[10px] font-telemetry uppercase tracking-[0.26em] text-white/80 text-center">
-          RAREZA DEL HALLAZGO
         </div>
 
-        {/* Rarity 1-100 Progress Meter */}
-        <div className="relative mt-6 mb-2">
-          <div
-            className="absolute -top-5 -translate-x-1/2 font-telemetry text-[12px] font-bold text-white drop-shadow"
-            style={{ left: `${clampedPct}%` }}
+        {/* Right: Soft Pill + Large Ethnocentric Score Number */}
+        <div className="flex flex-col items-end justify-between self-stretch shrink-0 pl-1">
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide inline-flex items-center gap-1 ${
+              isSaved
+                ? 'bg-red-600 text-white'
+                : 'bg-[#ffe8ea] text-[#dc264e]'
+            }`}
           >
-            {score} pts
-          </div>
+            {isSaved ? <Check className="w-2.5 h-2.5" /> : null}
+            <span>{isSaved ? 'Tuyo' : `#${rank}`}</span>
+          </span>
 
-          <div className="relative h-1.5 rounded-full bg-white/25 overflow-visible">
-            <div
-              className={`h-full rounded-full bg-gradient-to-r ${theme.barFill}`}
-              style={{ width: `${clampedPct}%` }}
-            />
+          <div className="flex items-baseline gap-1 mt-2">
             <span
-              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_14px_rgba(255,255,255,0.95)] ring-4 ring-white/25"
-              style={{ left: `${clampedPct}%` }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] text-white/85 font-medium mt-2">
-            <span>{car.hp ? `${car.hp} CV · ${car.country || 'Mundo'}` : car.country || 'Hallazgo real'}</span>
-            <span>{remainingTo100 === 0 ? 'Máximo histórico (100)' : `A ${remainingTo100} del 100`}</span>
-          </div>
-        </div>
-
-        {/* Dual Action Buttons */}
-        <div className="flex items-center gap-2.5 mt-3.5">
-          <button
-            type="button"
-            onClick={() => onOpenIn3D && onOpenIn3D(car)}
-            className="flex-1 py-2.5 px-3 rounded-xl border border-white/35 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
-          >
-            <Box className="w-3.5 h-3.5" />
-            <span>Ver en 3D</span>
-          </button>
-
-          {isSaved ? (
-            <div className="flex-[1.35] py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-white/20 text-white border border-white/30">
-              <Check className="w-3.5 h-3.5" />
-              <span>Ya en tu Garage</span>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onOpenScanner && onOpenScanner()}
-              className="flex-[1.35] py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm bg-white text-[#111318] hover:bg-zinc-100 active:scale-[0.98]"
+              className={`font-ethnocentric text-2xl sm:text-[28px] leading-none tracking-tight ${
+                score >= 90 ? 'text-red-600' : 'text-[#111318]'
+              }`}
+              title={`Índice de rareza ${score}/100`}
             >
-              <Camera className="w-3.5 h-3.5 text-red-600" />
-              <span>Escanear en Calle</span>
-            </button>
-          )}
+              {score}
+            </span>
+          </div>
         </div>
       </div>
     </article>
@@ -328,7 +288,6 @@ export default function WeeklyFindsFeed({
               rank={index + 1}
               isSaved={isCarInSavedSet(car, savedIds)}
               onOpenIn3D={onOpenIn3D}
-              onOpenScanner={onOpenScanner}
             />
           ))}
         </div>
