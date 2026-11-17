@@ -388,7 +388,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       coords,
       address: car.address || car.location || (coords ? 'GPS verificado' : 'Escaneo en calle')
     });
-    setToastMessage(`${car.brand} ${car.model} guardado en tu Garage`);
+    setToastMessage(`${car.brand} ${car.model} guardado en tu Garage y publicado en HOT`);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
@@ -492,7 +492,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
           <span className="pointer-events-none absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-red-500/50 z-20" />
 
           {/* Top Viewfinder HUD Status */}
-          <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-white/90 border border-black/[0.08] shadow-xs backdrop-blur-md flex items-center gap-1.5 text-[9px] font-telemetry text-[#111318] uppercase tracking-widest font-semibold">
+          <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-white/95 border border-black/[0.08] shadow-xs flex items-center gap-1.5 text-[9px] font-telemetry text-[#111318] uppercase tracking-widest font-semibold">
             <span className={`w-1.5 h-1.5 rounded-full ${cameraActive ? 'bg-red-600 animate-pulse' : analyzing ? 'bg-amber-500 animate-pulse' : 'bg-red-600'}`} />
             <span>{cameraActive ? 'VISOR ACTIVO' : analyzing ? 'ANALIZANDO' : 'LISTO PARA CAPTURA'}</span>
           </div>

@@ -58,14 +58,14 @@ export default function CarCard({ car, onSave, isSaved, dailyLimitReached = fals
           />
 
           {/* Capture Badge */}
-          <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-[10px] font-telemetry text-[#111318] flex items-center gap-1.5 border border-black/[0.08] shadow-xs">
+          <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-white/95 text-[10px] font-telemetry text-[#111318] flex items-center gap-1.5 border border-black/[0.08] shadow-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
             <span>Captura verificada</span>
           </div>
 
           {/* Color tag */}
           {car.color && (
-            <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-[10px] font-telemetry text-[#111318] border border-black/[0.08] flex items-center gap-1 max-w-[55%] shadow-xs">
+            <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-white/95 text-[10px] font-telemetry text-[#111318] border border-black/[0.08] flex items-center gap-1 max-w-[55%] shadow-xs">
               <Palette className="w-3 h-3 text-red-600 shrink-0" />
               <span className="truncate">{car.color}</span>
             </div>

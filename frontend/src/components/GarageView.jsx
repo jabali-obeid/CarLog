@@ -38,47 +38,47 @@ export default function GarageView({ garage, onDeleteCar }) {
     <div className="space-y-6">
       {/* Garage Dashboard Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-4 rounded-2xl bg-[#11131f] border border-white/10 shadow-lg">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Warehouse className="w-3.5 h-3.5 text-red-500" />
+        <div className="p-4 rounded-2xl cl-card">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Warehouse className="w-3.5 h-3.5 text-red-600" />
             Autos Coleccionados
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-            {totalCars} <span className="text-xs font-normal text-zinc-400">vehículos</span>
+          <div className="text-2xl sm:text-3xl font-extrabold font-telemetry text-[#111318] mt-1">
+            {totalCars} <span className="text-xs font-sans font-normal text-slate-500">vehículos</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#11131f] border border-white/10 shadow-lg">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
+        <div className="p-4 rounded-2xl cl-card">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-600" />
             Potencia del Garage
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1">
-            {totalHp.toLocaleString()} <span className="text-xs font-normal text-zinc-400">CV</span>
+          <div className="text-2xl sm:text-3xl font-extrabold font-telemetry text-amber-600 mt-1">
+            {totalHp.toLocaleString()} <span className="text-xs font-sans font-normal text-slate-500">CV</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#11131f] border border-white/10 shadow-lg">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="p-4 rounded-2xl cl-card">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Gauge className="w-3.5 h-3.5 text-red-600" />
             Más Rápido (0-100)
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold text-cyan-400 mt-1 truncate">
+          <div className="text-xl sm:text-2xl font-extrabold font-telemetry text-[#111318] mt-1 truncate">
             {fastestCar ? `${fastestCar.zeroToHundred}s` : '--'}
-            <span className="text-xs font-normal text-zinc-400 block truncate">
+            <span className="text-xs font-sans font-normal text-slate-500 block truncate">
               {fastestCar ? `${fastestCar.brand} ${fastestCar.model}` : 'Ninguno'}
             </span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#11131f] border border-white/10 shadow-lg">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-yellow-400" />
+        <div className="p-4 rounded-2xl cl-card">
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-red-600" />
             Nivel Coleccionista
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold text-yellow-400 mt-1">
+          <div className="text-xl sm:text-2xl font-extrabold text-[#111318] mt-1">
             {rarityCounts['Histórico'] || rarityCounts['Legendario'] ? '★ Maestro' : 'Experto'}
-            <span className="text-xs font-normal text-zinc-400 block">
+            <span className="text-xs font-normal text-slate-500 block">
               {(rarityCounts['Legendario'] || 0) + (rarityCounts['Histórico'] || 0)} Épicos
             </span>
           </div>
@@ -86,7 +86,7 @@ export default function GarageView({ garage, onDeleteCar }) {
       </div>
 
       {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#0d0f17] p-3 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 cl-card p-3 rounded-2xl">
         {/* Rarity Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {rarityTabs.map((tab) => {
@@ -95,15 +95,16 @@ export default function GarageView({ garage, onDeleteCar }) {
             return (
               <button
                 key={tab}
+                type="button"
                 onClick={() => setSelectedFilter(tab)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 ${
                   active
-                    ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
-                    : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white'
+                    ? 'bg-red-600 text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-[#111318]'
                 }`}
               >
                 <span>{tab}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${active ? 'bg-black/30 text-white' : 'bg-white/10 text-zinc-400'}`}>
+                <span className={`text-[11px] px-1.5 py-0.2 rounded-full ${active ? 'bg-black/20 text-white' : 'bg-white text-slate-600'}`}>
                   {count}
                 </span>
               </button>
@@ -113,23 +114,24 @@ export default function GarageView({ garage, onDeleteCar }) {
 
         {/* Search */}
         <div className="relative min-w-[200px]">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
           <input
             type="text"
+            aria-label="Buscar en mi garage"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar por marca o modelo..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-black/[0.1] text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
           />
         </div>
       </div>
 
       {/* Garage Cards Grid */}
       {filteredCars.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-3xl bg-[#0f111a] border border-white/5 space-y-3">
-          <Warehouse className="w-12 h-12 text-zinc-600 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No se encontraron autos en esta sección</h3>
-          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+        <div className="text-center py-16 px-4 rounded-3xl cl-card space-y-3">
+          <Warehouse className="w-12 h-12 text-slate-400 mx-auto" />
+          <h3 className="text-lg font-bold text-[#111318]">No se encontraron autos en esta sección</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
             Utiliza la pestaña <strong>Scanner</strong> para fotografiar vehículos o prueba los autos de demostración para agregarlos a tu garage.
           </p>
         </div>
@@ -148,11 +150,13 @@ export default function GarageView({ garage, onDeleteCar }) {
                 
                 {/* Delete button from garage */}
                 <button
+                  type="button"
                   onClick={() => onDeleteCar(car.id)}
                   title="Eliminar de mi garage"
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-red-600/80 text-zinc-400 hover:text-white transition opacity-0 group-hover:opacity-100 z-30"
+                  aria-label={`Eliminar ${car.brand} ${car.model} de mi garage`}
+                  className="absolute top-2 right-2 p-2.5 rounded-full bg-black/70 hover:bg-red-600 text-zinc-200 hover:text-white transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 z-30"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             );

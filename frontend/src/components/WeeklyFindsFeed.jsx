@@ -10,7 +10,7 @@ const FILTER_TABS = [
   { id: 'classics', label: 'Clásicos' }
 ];
 
-function BubbleFindCard({ car, rank, isSaved, onOpenIn3D }) {
+const BubbleFindCard = React.memo(function BubbleFindCard({ car, rank, isSaved, onOpenIn3D }) {
   const [imgFailed, setImgFailed] = useState(false);
   const modelName = car.model || car.name || 'Modelo';
   const score = car._score;
@@ -19,8 +19,17 @@ function BubbleFindCard({ car, rank, isSaved, onOpenIn3D }) {
 
   return (
     <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver ${car.brand} ${modelName} en 3D, puntaje ${score}`}
       onClick={() => onOpenIn3D && onOpenIn3D(car)}
-      className="rounded-[22px] bg-white border border-black/[0.07] shadow-[0_14px_30px_-14px_rgba(15,23,42,0.16)] p-3.5 sm:p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 active:scale-[0.99]"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (onOpenIn3D) onOpenIn3D(car);
+        }
+      }}
+      className="cl-list-item rounded-[22px] bg-white border border-black/[0.07] shadow-[0_14px_30px_-14px_rgba(15,23,42,0.16)] p-3.5 sm:p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
     >
       <div className="flex items-center justify-between gap-3">
         {/* Left: Square Rounded Car Photo */}
@@ -93,7 +102,7 @@ function BubbleFindCard({ car, rank, isSaved, onOpenIn3D }) {
       </div>
     </article>
   );
-}
+});
 
 export default function WeeklyFindsFeed({
   savedIds = new Set(),
@@ -198,6 +207,9 @@ export default function WeeklyFindsFeed({
             <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#111318] tracking-tight leading-none mt-1 uppercase">
               HOT · Hallazgos Reales
             </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Ranking semanal de autos reales escaneados por la comunidad.
+            </p>
           </div>
 
           <div className="px-2.5 py-1 rounded-full bg-white border border-black/[0.07] shadow-xs text-[11px] font-telemetry font-bold text-[#111318] flex items-center gap-1 shrink-0">
@@ -212,10 +224,11 @@ export default function WeeklyFindsFeed({
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
+                aria-label="Buscar hallazgo, spotter o lugar"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar hallazgo, spotter o lugar..."
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-white border border-black/[0.07] text-xs text-[#111318] placeholder-slate-400 shadow-xs focus:outline-none focus:border-[#dc264e]/50"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl bg-white border border-black/[0.07] text-xs text-[#111318] placeholder-slate-400 shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#dc264e]/40 focus:border-[#dc264e]/50"
               />
             </div>
 

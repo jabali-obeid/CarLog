@@ -289,10 +289,14 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
                   style={{ transform: `translate(${x}px, ${y}px)` }}
                   title={`${spot.brand} ${spot.model} (${formatDistance(spot.distanceMeters)})`}
                   aria-label={`Objetivo ${spot.brand} ${spot.model} a ${formatDistance(spot.distanceMeters)}`}
-                  className={`absolute w-3.5 h-3.5 rounded-full cursor-pointer transition-transform hover:scale-150 focus:outline-none z-20 border-2 border-white shadow ${
-                    isSelected ? 'ring-2 ring-red-600 scale-125' : ''
-                  } ${claimed ? 'bg-slate-400' : 'bg-red-600'}`}
-                />
+                  className="absolute w-10 h-10 flex items-center justify-center cursor-pointer transition-transform hover:scale-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 rounded-full z-20"
+                >
+                  <span
+                    className={`w-3.5 h-3.5 rounded-full border-2 border-white shadow ${
+                      isSelected ? 'ring-2 ring-red-600 scale-125' : ''
+                    } ${claimed ? 'bg-slate-400' : 'bg-red-600'}`}
+                  />
+                </button>
               );
             })}
           </div>
@@ -394,24 +398,27 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
           >
             <input
               type="text"
+              aria-label="Marca del vehículo"
               value={reportForm.brand}
               onChange={(e) => setReportForm((p) => ({ ...p, brand: e.target.value }))}
               placeholder="Marca (ej: Subaru)"
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
               required
             />
             <input
               type="text"
+              aria-label="Modelo del vehículo"
               value={reportForm.model}
               onChange={(e) => setReportForm((p) => ({ ...p, model: e.target.value }))}
               placeholder="Modelo (ej: Impreza WRX)"
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
               required
             />
             <select
+              aria-label="Rareza del vehículo"
               value={reportForm.rarity}
               onChange={(e) => setReportForm((p) => ({ ...p, rarity: e.target.value }))}
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] focus:outline-none focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
             >
               <option value="Común">Común</option>
               <option value="Raro">Raro</option>
@@ -420,15 +427,16 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
             </select>
             <input
               type="text"
+              aria-label="Calle o zona del avistamiento"
               value={reportForm.address}
               onChange={(e) => setReportForm((p) => ({ ...p, address: e.target.value }))}
               placeholder="Calle / Zona (opcional)"
-              className="px-3 py-2 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
             />
             <button
               type="submit"
               disabled={reportSubmitting}
-              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition active:scale-95 disabled:opacity-60"
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition active:scale-95 disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
             >
               {reportSubmitting ? 'Publicando...' : 'Transmitir Señal'}
             </button>

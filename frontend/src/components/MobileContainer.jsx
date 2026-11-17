@@ -61,7 +61,7 @@ export default function MobileContainer({
   ];
 
   return (
-    <div className="relative flex flex-col items-center justify-center p-0 sm:py-3 sm:px-3 select-none min-h-[100dvh] w-full bg-[#eef0f3] text-[#111318]">
+    <div className="relative flex flex-col items-center justify-center p-0 sm:py-3 sm:px-3 min-h-[100dvh] w-full bg-[#eef0f3] text-[#111318]">
       {/* Toast popup */}
       {toast && (
         <div

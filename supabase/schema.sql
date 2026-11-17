@@ -15,14 +15,17 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Los perfiles públicos son visibles para todos" on public.profiles;
 create policy "Los perfiles públicos son visibles para todos"
   on public.profiles for select
   using ( true );
 
+drop policy if exists "Los usuarios pueden actualizar su propio perfil" on public.profiles;
 create policy "Los usuarios pueden actualizar su propio perfil"
   on public.profiles for update
   using ( auth.uid() = id );
 
+drop policy if exists "Los usuarios pueden insertar su propio perfil" on public.profiles;
 create policy "Los usuarios pueden insertar su propio perfil"
   on public.profiles for insert
   with check ( auth.uid() = id );
@@ -72,18 +75,22 @@ create table if not exists public.garage_cars (
 
 alter table public.garage_cars enable row level security;
 
+drop policy if exists "Cada usuario ve sus propios autos" on public.garage_cars;
 create policy "Cada usuario ve sus propios autos"
   on public.garage_cars for select
   using ( auth.uid() = user_id );
 
+drop policy if exists "Cada usuario guarda autos en su propio garage" on public.garage_cars;
 create policy "Cada usuario guarda autos en su propio garage"
   on public.garage_cars for insert
   with check ( auth.uid() = user_id );
 
+drop policy if exists "Cada usuario actualiza sus propios autos" on public.garage_cars;
 create policy "Cada usuario actualiza sus propios autos"
   on public.garage_cars for update
   using ( auth.uid() = user_id );
 
+drop policy if exists "Cada usuario elimina autos de su propio garage" on public.garage_cars;
 create policy "Cada usuario elimina autos de su propio garage"
   on public.garage_cars for delete
   using ( auth.uid() = user_id );
@@ -113,10 +120,12 @@ create table if not exists public.radar_spots (
 
 alter table public.radar_spots enable row level security;
 
+drop policy if exists "Cualquiera puede ver alertas activas del radar" on public.radar_spots;
 create policy "Cualquiera puede ver alertas activas del radar"
   on public.radar_spots for select
   using ( true );
 
+drop policy if exists "Usuarios autenticados pueden emitir alertas al radar" on public.radar_spots;
 create policy "Usuarios autenticados pueden emitir alertas al radar"
   on public.radar_spots for insert
   with check ( auth.uid() = user_id );
@@ -126,10 +135,12 @@ insert into storage.buckets (id, name, public)
 values ('car-photos', 'car-photos', true)
 on conflict (id) do nothing;
 
+drop policy if exists "Fotos de autos visibles públicamente" on storage.objects;
 create policy "Fotos de autos visibles públicamente"
   on storage.objects for select
   using ( bucket_id = 'car-photos' );
 
+drop policy if exists "Usuarios autenticados suben fotos a su carpeta" on storage.objects;
 create policy "Usuarios autenticados suben fotos a su carpeta"
   on storage.objects for insert
   with check (
@@ -148,6 +159,7 @@ create table if not exists public.daily_scan_usage (
 
 alter table public.daily_scan_usage enable row level security;
 
+drop policy if exists "Cada usuario consulta su propio consumo diario" on public.daily_scan_usage;
 create policy "Cada usuario consulta su propio consumo diario"
   on public.daily_scan_usage for select
   using ( auth.uid() = user_id );

@@ -102,49 +102,55 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-3">
           {isRegister && (
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+              <label htmlFor="auth-username" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-red-600" />
                 Nombre de Usuario
               </label>
               <input
+                id="auth-username"
                 type="text"
+                autoComplete="username"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="ej: Lucas_Spotter"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500 transition"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
               />
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+            <label htmlFor="auth-email" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5 text-red-600" />
               {isRegister ? 'Correo Electrónico' : 'Usuario o Correo'}
             </label>
             <input
-              type="text"
+              id="auth-email"
+              type={isRegister ? 'email' : 'text'}
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500 transition"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
+            <label htmlFor="auth-password" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-red-600" />
               Contraseña
             </label>
             <input
+              id="auth-password"
               type="password"
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
               required
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus:border-red-500 transition"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
             />
           </div>
 

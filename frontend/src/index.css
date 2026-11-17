@@ -71,7 +71,6 @@
     background-color: var(--cl-canvas);
     color: var(--cl-text-primary);
     font-family: var(--font-sans);
-    user-select: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -244,6 +243,11 @@
 
   .cl-orb-pop {
     animation: cl-orb-pop 430ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cl-list-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 104px;
   }
 }
 

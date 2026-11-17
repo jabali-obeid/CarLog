@@ -54,8 +54,17 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
 
   return (
     <article
+      role="button"
+      tabIndex={0}
+      aria-label={`Seleccionar ${car.brand} ${modelName}`}
       onClick={() => onSelectFeatured(car.id)}
-      className={`group relative rounded-[24px] transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelectFeatured(car.id);
+        }
+      }}
+      className={`group relative rounded-[24px] transition-all duration-300 cursor-pointer flex flex-col justify-between overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 ${
         isTwoCol ? 'p-3.5' : 'p-4 sm:p-5'
       } ${
         isFeatured
@@ -141,7 +150,7 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
-            <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded-md bg-white/88 backdrop-blur-sm text-[9px] font-telemetry font-semibold text-[#111318] border border-black/[0.06]">
+            <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded-md bg-white/95 text-[9px] font-telemetry font-semibold text-[#111318] border border-black/[0.06]">
               {car.rarity || 'Showroom'}
             </span>
           </div>
