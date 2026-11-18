@@ -152,6 +152,8 @@ export default function MobileContainer({
             <div className="flex-1 overflow-y-auto pb-8 bg-canvas text-ink scrollbar-none">
               <WeeklyFindsFeed
                 savedIds={savedIds}
+                garage={garage}
+                currentUser={user}
                 onOpenIn3D={onOpenCarIn3D}
                 onOpenScanner={() => onTabChange('scanner')}
                 onOpenRadar={() => onTabChange('radar')}

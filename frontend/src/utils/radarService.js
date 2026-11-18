@@ -1,5 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from './supabaseClient';
 import { getCurrentSession } from './auth';
+import { dataUrlToBlob } from './imageUtils';
 
 const LOCAL_RADAR_KEY = 'carlog_local_radar_spots';
 const WEEKLY_FINDS_KEY = 'carlog_weekly_real_finds';
@@ -284,6 +285,8 @@ export async function fetchWeeklyRealFinds() {
     seenIds.add(id);
     results.push({
       id,
+      userId: raw.user_id || raw.userId || '',
+      source: raw.source || '',
       brand: raw.brand,
       model: raw.model || raw.name || 'Modelo',
       year: raw.year ? String(raw.year) : '',
@@ -296,15 +299,26 @@ export async function fetchWeeklyRealFinds() {
       country: raw.country || '',
       funFact: raw.funFact || raw.fun_fact || '',
       model3dUrl: raw.model3dUrl || raw.model_3d_url || '',
-      imageUrl: raw.image_silhouette || raw.imageSilhouette || raw.imageUrl || raw.image || '',
+      imageUrl: raw.image_url || raw.image_silhouette || raw.imageSilhouette || raw.imageUrl || raw.image || '',
       spottedBy: raw.spotted_by || raw.spottedBy || 'Spotter',
-      location: raw.address || raw.location || 'Ubicación en calle',
+      location: raw.location || raw.address || 'Ubicación en calle',
       spottedAt: raw.spotted_at || raw.spottedAt || raw.capturedAt
     });
   };
 
   const supabase = getSupabase();
   if (supabase && isSupabaseConfigured()) {
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_weekly_hot_finds', {
+        days_back: 7
+      });
+      if (!rpcError && Array.isArray(rpcData)) {
+        rpcData.forEach(pushUnique);
+      }
+    } catch {
+      // RPC might not exist yet before schema.sql is re-run; fall back cleanly to radar_spots
+    }
+
     try {
       const { data, error } = await supabase
         .from('radar_spots')
@@ -376,11 +390,48 @@ export async function publishRadarSpot({
   if (!isSim && supabase && isSupabaseConfigured()) {
     try {
       let cloudUserId = (session?.isCloud || session?.provider === 'supabase') ? session?.id : null;
-      if (!cloudUserId) {
+      let authMetaUsername = '';
+      if (!cloudUserId || !newSpot.spottedBy || newSpot.spottedBy === 'Spotter') {
         const { data: authData } = await supabase.auth.getSession();
-        cloudUserId = authData?.session?.user?.id || null;
+        if (!cloudUserId) {
+          cloudUserId = authData?.session?.user?.id || null;
+        }
+        authMetaUsername = authData?.session?.user?.user_metadata?.username || '';
       }
       if (cloudUserId) {
+        if (!newSpot.spottedBy || newSpot.spottedBy === 'Spotter') {
+          if (authMetaUsername) {
+            newSpot.spottedBy = authMetaUsername;
+          } else {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', cloudUserId)
+              .maybeSingle();
+            if (prof?.username) {
+              newSpot.spottedBy = prof.username;
+            }
+          }
+        }
+
+        if (newSpot.imageSilhouette && newSpot.imageSilhouette.startsWith('data:image/')) {
+          try {
+            const filePath = `${cloudUserId}/${newSpot.id}.jpg`;
+            const blob = dataUrlToBlob(newSpot.imageSilhouette);
+            const { error: uploadErr } = await supabase.storage
+              .from('car-photos')
+              .upload(filePath, blob, { upsert: true, contentType: 'image/jpeg' });
+            if (!uploadErr) {
+              const { data: pub } = supabase.storage.from('car-photos').getPublicUrl(filePath);
+              if (pub?.publicUrl) {
+                newSpot.imageSilhouette = pub.publicUrl;
+              }
+            }
+          } catch {
+            // Keep inline image fallback if storage upload fails
+          }
+        }
+
         const { error } = await supabase.from('radar_spots').insert({
           id: newSpot.id,
           user_id: cloudUserId,

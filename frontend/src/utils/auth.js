@@ -71,6 +71,18 @@ export function getUsers() {
   }
 }
 
+function persistCurrentSession(session) {
+  try {
+    if (session) {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    } else {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 function mapSupabaseSession(authSession, profile = null) {
   if (!authSession?.user) return null;
   const u = authSession.user;
@@ -128,7 +140,9 @@ export async function registerUser({ username, email, password }) {
         needsEmailConfirmation: true
       };
     }
-    return mapSupabaseSession(data.session, { username: cleanUser });
+    const mapped = mapSupabaseSession(data.session, { username: cleanUser });
+    persistCurrentSession(mapped);
+    return mapped;
   }
 
   // Local device account fallback
@@ -191,7 +205,9 @@ export async function loginUser({ email, password }) {
       .eq('id', data.user.id)
       .maybeSingle();
 
-    return mapSupabaseSession(data.session, profile);
+    const mapped = mapSupabaseSession(data.session, profile);
+    persistCurrentSession(mapped);
+    return mapped;
   }
 
   // Local device account fallback
@@ -229,8 +245,11 @@ export async function resolveCurrentSession() {
         .select('*')
         .eq('id', data.session.user.id)
         .maybeSingle();
-      return mapSupabaseSession(data.session, profile);
+      const mapped = mapSupabaseSession(data.session, profile);
+      persistCurrentSession(mapped);
+      return mapped;
     }
+    persistCurrentSession(null);
     return null;
   }
 
@@ -487,11 +506,53 @@ export async function syncGuestCarsToUser(userId) {
   const existingUserCars = (await getUserGarage(userId)) || [];
   let merged = [...existingUserCars];
 
+  const supabase = getSupabase();
+  let spotterName = getCurrentSession()?.username || '';
+  if (supabase && isSupabaseConfigured() && !spotterName) {
+    try {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', userId)
+        .maybeSingle();
+      if (prof?.username) spotterName = prof.username;
+    } catch {
+      // Ignore profile lookup errors
+    }
+  }
+  const weekCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
   for (const guestCar of customGuestCars) {
     if (!isDuplicateCar(guestCar, merged)) {
       const result = await saveCarForUser(userId, guestCar, merged);
       if (result?.saved && Array.isArray(result.updatedList)) {
         merged = result.updatedList;
+        const savedCar = result.savedCar || guestCar;
+        const capturedMs = new Date(savedCar.capturedAt || Date.now()).getTime();
+        if (supabase && isSupabaseConfigured() && Number.isFinite(capturedMs) && capturedMs >= weekCutoff) {
+          try {
+            await supabase.from('radar_spots').insert({
+              id: `spot-sync-${savedCar.id || Date.now()}`,
+              user_id: userId,
+              brand: savedCar.brand || 'Deportivo',
+              model: savedCar.model || savedCar.name || 'Modelo',
+              year: savedCar.year ? String(savedCar.year) : String(new Date().getFullYear()),
+              rarity: savedCar.rarity || 'Común',
+              hp: Number(savedCar.hp) || 0,
+              zero_to_hundred: Number(savedCar.zeroToHundred) || 0,
+              top_speed: Number(savedCar.topSpeed) || 0,
+              engine: savedCar.engine || '',
+              color: savedCar.color || '',
+              image_silhouette: savedCar.imageUrl || savedCar.image || '',
+              spotted_by: savedCar.spottedBy || spotterName || 'Spotter',
+              address: savedCar.location || savedCar.address || 'Escaneo en calle',
+              spotted_at: savedCar.capturedAt || new Date().toISOString(),
+              expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+            });
+          } catch {
+            // Ignore radar_spots sync failures cleanly
+          }
+        }
       }
     }
   }

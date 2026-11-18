@@ -378,17 +378,18 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       setTimeout(() => setToastMessage(null), 3600);
       return;
     }
+    const savedCar = res?.savedCar || car;
     const session = getCurrentSession();
     const coords = getSavedUserCoords();
     await publishRadarSpot({
       car: {
-        ...car,
-        spottedBy: car.spottedBy || session?.username || 'Spotter'
+        ...savedCar,
+        spottedBy: savedCar.spottedBy || session?.username || 'Spotter'
       },
       coords,
-      address: car.address || car.location || (coords ? 'GPS verificado' : 'Escaneo en calle')
+      address: savedCar.address || savedCar.location || (coords ? 'GPS verificado' : 'Escaneo en calle')
     });
-    setToastMessage(`${car.brand} ${car.model} guardado en tu Garage y publicado en HOT`);
+    setToastMessage(`${savedCar.brand} ${savedCar.model} guardado en tu Garage y publicado en HOT`);
     setTimeout(() => setToastMessage(null), 3500);
   };
 

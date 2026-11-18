@@ -222,4 +222,97 @@ $$;
 
 grant execute on function public.consume_daily_scan(integer) to authenticated;
 
+-- 6. Feed público semanal HOT (agrega garage_cars y radar_spots de todos los usuarios)
+create or replace function public.get_weekly_hot_finds(days_back integer default 7)
+returns table (
+  id text,
+  user_id uuid,
+  brand text,
+  model text,
+  year text,
+  rarity text,
+  hp integer,
+  zero_to_hundred numeric,
+  top_speed integer,
+  engine text,
+  color text,
+  country text,
+  fun_fact text,
+  model_3d_url text,
+  image_url text,
+  spotted_by text,
+  location text,
+  spotted_at timestamptz,
+  source text
+)
+language sql
+security definer
+set search_path = public
+as $$
+  with cutoff as (
+    select timezone('utc'::text, now()) - make_interval(days => greatest(1, coalesce(days_back, 7))) as ts
+  )
+  select
+    g.id,
+    g.user_id,
+    g.brand,
+    g.model,
+    coalesce(g.year, ''),
+    coalesce(g.rarity, 'Común'),
+    coalesce(g.hp, 0),
+    coalesce(g.zero_to_hundred, 0),
+    coalesce(g.top_speed, 0),
+    coalesce(g.engine, ''),
+    coalesce(g.color, ''),
+    coalesce(g.country, ''),
+    coalesce(g.fun_fact, ''),
+    coalesce(g.model_3d_url, ''),
+    coalesce(g.image_url, ''),
+    coalesce(p.username, 'Spotter'),
+    'Escaneo en calle'::text,
+    g.captured_at,
+    'garage'::text
+  from public.garage_cars g
+  left join public.profiles p on p.id = g.user_id
+  cross join cutoff c
+  where g.captured_at >= c.ts
+    and g.id not like 'car-seed-%'
+    and g.id not like 'sim-%'
+
+  union all
+
+  select
+    r.id,
+    r.user_id,
+    r.brand,
+    r.model,
+    coalesce(r.year, ''),
+    coalesce(r.rarity, 'Común'),
+    coalesce(r.hp, 0),
+    coalesce(r.zero_to_hundred, 0),
+    coalesce(r.top_speed, 0),
+    coalesce(r.engine, ''),
+    coalesce(r.color, ''),
+    ''::text,
+    ''::text,
+    ''::text,
+    coalesce(r.image_silhouette, ''),
+    coalesce(nullif(r.spotted_by, ''), p.username, 'Spotter'),
+    coalesce(nullif(r.address, ''), 'Ubicación en calle'),
+    r.spotted_at,
+    'radar'::text
+  from public.radar_spots r
+  left join public.profiles p on p.id = r.user_id
+  cross join cutoff c
+  where r.spotted_at >= c.ts
+    and r.id not like 'sim-%'
+    and r.id not like 'seed-spot-%'
+
+  order by spotted_at desc
+  limit 120;
+$$;
+
+grant execute on function public.get_weekly_hot_finds(integer) to anon, authenticated;
+
+
 
