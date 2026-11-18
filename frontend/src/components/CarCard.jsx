@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, Zap, Gauge, Award, Fuel, Sparkles, MapPin, Palette, Info, Check } from 'lucide-react';
+import { Volume2, Zap, Gauge, Award, Fuel, Sparkles, MapPin, Palette, Info, Check } from './CarLogIcons';
 import { RARITY_CONFIG } from '../utils/demoData';
 import { sound } from '../utils/audio';
 import { getCarRarityScore } from '../utils/carScore';
@@ -30,7 +30,7 @@ export default function CarCard({ car, onSave, isSaved, dailyLimitReached = fals
             <span className="text-[10px] font-telemetry font-bold px-2 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-200 shrink-0">
               {rarityScore}/100
             </span>
-            <span className="text-[11px] font-telemetry text-slate-500 truncate">
+            <span className="text-[11px] font-telemetry text-ink-muted truncate">
               {car.country || 'Origen Global'}
             </span>
           </div>
@@ -39,7 +39,7 @@ export default function CarCard({ car, onSave, isSaved, dailyLimitReached = fals
             onClick={handleRev}
             title="Acelerar y escuchar motor"
             aria-label="Acelerar y escuchar motor"
-            className="p-1.5 rounded-lg cl-pill hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors text-slate-600 active:scale-90 shrink-0"
+            className="p-1.5 rounded-lg cl-pill hover:bg-racing-soft hover:border-red-300 hover:text-racing-ink transition-colors text-ink-secondary active:scale-90 shrink-0"
           >
             <Volume2 className="w-4 h-4" />
           </button>
@@ -86,8 +86,8 @@ export default function CarCard({ car, onSave, isSaved, dailyLimitReached = fals
             </div>
 
             {car.engine && (
-              <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-1">
-                <Fuel className="w-3.5 h-3.5 text-red-500 shrink-0" />
+              <p className="text-xs text-ink-secondary flex items-center gap-1.5 mt-1">
+                <Fuel className="w-3.5 h-3.5 text-racing-ink shrink-0" />
                 <span className="truncate">{car.engine}</span>
               </p>
             )}
@@ -96,29 +96,29 @@ export default function CarCard({ car, onSave, isSaved, dailyLimitReached = fals
           {/* Tabular Telemetry Strip */}
           <div className="grid grid-cols-3 divide-x divide-black/[0.07] py-2.5 rounded-xl cl-panel text-center">
             <div className="px-2">
-              <div className="text-[9px] font-telemetry uppercase text-slate-500 flex items-center justify-center gap-1">
-                <Zap className="w-3 h-3 text-red-600" /> Potencia
+              <div className="text-[9px] font-telemetry uppercase text-ink-muted flex items-center justify-center gap-1">
+                <Zap className="w-3 h-3 text-racing-ink" /> Potencia
               </div>
-              <div className="font-telemetry text-base font-bold text-[#111318] mt-0.5">
-                {car.hp || 200} <span className="text-[10px] text-slate-500 font-normal">CV</span>
-              </div>
-            </div>
-
-            <div className="px-2">
-              <div className="text-[9px] font-telemetry uppercase text-slate-500 flex items-center justify-center gap-1">
-                <Gauge className="w-3 h-3 text-red-600" /> 0–100
-              </div>
-              <div className="font-telemetry text-base font-bold text-[#111318] mt-0.5">
-                {car.zeroToHundred || 5.2} <span className="text-[10px] text-slate-500 font-normal">s</span>
+              <div className="font-telemetry text-base font-bold text-ink mt-0.5">
+                {car.hp || 200} <span className="text-[10px] text-ink-muted font-normal">CV</span>
               </div>
             </div>
 
             <div className="px-2">
-              <div className="text-[9px] font-telemetry uppercase text-slate-500 flex items-center justify-center gap-1">
-                <Award className="w-3 h-3 text-red-600" /> Vel. Máx
+              <div className="text-[9px] font-telemetry uppercase text-ink-muted flex items-center justify-center gap-1">
+                <Gauge className="w-3 h-3 text-racing-ink" /> 0–100
               </div>
-              <div className="font-telemetry text-base font-bold text-[#111318] mt-0.5">
-                {car.topSpeed || 240} <span className="text-[10px] text-slate-500 font-normal">km/h</span>
+              <div className="font-telemetry text-base font-bold text-ink mt-0.5">
+                {car.zeroToHundred || 5.2} <span className="text-[10px] text-ink-muted font-normal">s</span>
+              </div>
+            </div>
+
+            <div className="px-2">
+              <div className="text-[9px] font-telemetry uppercase text-ink-muted flex items-center justify-center gap-1">
+                <Award className="w-3 h-3 text-racing-ink" /> Vel. Máx
+              </div>
+              <div className="font-telemetry text-base font-bold text-ink mt-0.5">
+                {car.topSpeed || 240} <span className="text-[10px] text-ink-muted font-normal">km/h</span>
               </div>
             </div>
           </div>

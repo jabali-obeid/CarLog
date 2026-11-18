@@ -34,7 +34,7 @@ class AppErrorBoundary extends React.Component {
             CL
           </div>
           <h2 className="text-lg font-bold">CarLog necesitó reiniciar la vista</h2>
-          <p className="text-xs text-zinc-400 max-w-xs">
+          <p className="text-xs text-pit-muted max-w-xs">
             Ocurrió una interrupción al volver desde segundo plano. Toca abajo para recargar sin perder tus autos.
           </p>
           <button

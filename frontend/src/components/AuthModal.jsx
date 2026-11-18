@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, ArrowRight, CheckCircle2, AlertCircle, X, Cloud, HardDrive } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, CheckCircle2, AlertCircle, X, Cloud, HardDrive } from './CarLogIcons';
 import { registerUser, loginUser } from '../utils/auth';
 import { isSupabaseConfigured } from '../utils/supabaseClient';
 
@@ -52,22 +52,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in select-none">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white border border-black/[0.08] p-6 shadow-2xl text-[#111318] space-y-5">
+      <div className="relative w-full max-w-sm rounded-3xl bg-surface border border-black/[0.08] p-6 shadow-2xl text-ink space-y-5">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 transition"
+          className="absolute top-4 right-4 p-2 rounded-full bg-recessed hover:bg-racing-soft text-ink-muted hover:text-racing-ink transition"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="text-center space-y-1.5">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto shadow-md border border-red-700/20 bg-red-600 p-2.5 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto shadow-md border border-red-700/20 bg-racing p-2.5 flex items-center justify-center">
             <img src="/logo.png" alt="CarLog" className="w-full h-full object-contain" />
           </div>
-          <h2 className="text-xl font-black text-[#111318] tracking-tight mt-2">
+          <h2 className="font-display text-xl font-black text-ink tracking-tight mt-2">
             {isRegister ? 'Crear Cuenta CarLog' : 'Iniciar Sesión'}
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-ink-secondary">
             {isRegister
               ? 'Guarda tus autos capturados y medallas de Spotter'
               : 'Accede a tu Garage y progreso guardado'}
@@ -76,8 +76,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <div className="pt-1 flex justify-center">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono border ${
               cloudEnabled
-                ? 'bg-red-50 border-red-200 text-red-700'
-                : 'bg-slate-100 border-slate-200 text-slate-600'
+                ? 'bg-racing-soft border-red-200 text-racing-ink'
+                : 'bg-recessed border-black/[0.08] text-ink-secondary'
             }`}>
               {cloudEnabled ? <Cloud className="w-3 h-3" /> : <HardDrive className="w-3 h-3" />}
               <span>{cloudEnabled ? 'Sincronización Nube (Supabase)' : 'Almacenamiento Local (Dispositivo)'}</span>
@@ -86,15 +86,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <div className="p-3 rounded-xl bg-racing-soft border border-red-200 text-xs text-racing-ink flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-racing-ink shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-ink flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-ink shrink-0" />
             <span>{success}</span>
           </div>
         )}
@@ -102,8 +102,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-3">
           {isRegister && (
             <div className="space-y-1">
-              <label htmlFor="auth-username" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-red-600" />
+              <label htmlFor="auth-username" className="text-[11px] font-semibold text-ink-secondary flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-racing-ink" />
                 Nombre de Usuario
               </label>
               <input
@@ -114,14 +114,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="ej: Lucas_Spotter"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing transition"
               />
             </div>
           )}
 
           <div className="space-y-1">
-            <label htmlFor="auth-email" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-red-600" />
+            <label htmlFor="auth-email" className="text-[11px] font-semibold text-ink-secondary flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-racing-ink" />
               {isRegister ? 'Correo Electrónico' : 'Usuario o Correo'}
             </label>
             <input
@@ -132,13 +132,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing transition"
             />
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="auth-password" className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5">
-              <Lock className="w-3.5 h-3.5 text-red-600" />
+            <label htmlFor="auth-password" className="text-[11px] font-semibold text-ink-secondary flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-racing-ink" />
               Contraseña
             </label>
             <input
@@ -150,21 +150,21 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500 transition"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing transition"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-700 disabled:opacity-60 transition shadow-md active:scale-95 flex items-center justify-center gap-2 mt-2"
+            className="w-full py-2.5 rounded-xl bg-racing text-white font-bold text-xs hover:bg-racing-ink disabled:opacity-60 transition shadow-md active:scale-95 flex items-center justify-center gap-2 mt-2"
           >
             <span>{loading ? 'Procesando...' : isRegister ? 'Registrarme' : 'Entrar'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
 
-        <div className="pt-2 border-t border-black/[0.08] text-center text-xs text-slate-500">
+        <div className="pt-2 border-t border-black/[0.08] text-center text-xs text-ink-secondary">
           {isRegister ? (
             <span>
               ¿Ya tienes cuenta?{' '}
@@ -175,7 +175,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   setError(null);
                   setSuccess(null);
                 }}
-                className="font-bold text-red-600 hover:underline ml-1"
+                className="font-bold text-racing-ink hover:underline ml-1"
               >
                 Inicia sesión
               </button>

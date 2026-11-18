@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, Warehouse, Box } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Warehouse, Box } from './CarLogIcons';
 
 export default function BrandBookshelf({
   garage = [],
@@ -369,15 +369,15 @@ export default function BrandBookshelf({
     <div className="space-y-4 max-w-6xl mx-auto select-none">
       {/* Header Monotype x Colophon Style */}
       <div className="text-center space-y-1.5 pb-3 border-b border-black/[0.08] px-2">
-        <div className="inline-flex items-center gap-2 text-[10px] font-telemetry tracking-widest text-slate-500 uppercase font-semibold">
+        <div className="inline-flex items-center gap-2 text-[10px] font-telemetry tracking-widest text-ink-muted uppercase font-semibold">
           <span>CARLOG</span>
-          <span className="text-red-600 font-bold">×</span>
+          <span className="text-racing-ink font-bold">×</span>
           <span>ARCHIVO DE MARCAS</span>
         </div>
-        <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#111318] tracking-tight uppercase">
+        <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-ink tracking-tight uppercase">
           Biblioteca de Marcas
         </h2>
-        <p className="text-xs text-slate-600 max-w-xs mx-auto">
+        <p className="text-xs text-ink-secondary max-w-xs mx-auto">
           Desliza horizontalmente y toca un volumen para abrir tus autos capturados en 3D.
         </p>
 
@@ -385,9 +385,9 @@ export default function BrandBookshelf({
         <div className="pt-2 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => onSelectBrand('ALL')}
-            className="px-4 py-1.5 rounded-full bg-white hover:bg-red-50 border border-black/[0.1] text-[11px] font-telemetry font-bold text-[#111318] transition flex items-center gap-1.5 active:scale-95 shadow-2xs"
+            className="px-4 py-1.5 rounded-full bg-surface hover:bg-racing-soft border border-black/[0.1] text-[11px] font-telemetry font-bold text-ink transition flex items-center gap-1.5 active:scale-95 shadow-2xs"
           >
-            <Warehouse className="w-3.5 h-3.5 text-red-600" />
+            <Warehouse className="w-3.5 h-3.5 text-racing-ink" />
             <span>
               {showingShowroom ? `Ver Showroom (${garage.length})` : `Mi Flota (${garage.length})`}
             </span>
@@ -398,8 +398,8 @@ export default function BrandBookshelf({
               onClick={onToggleShowroom}
               className={`px-4 py-1.5 rounded-full border text-[11px] font-telemetry font-bold transition flex items-center gap-1.5 active:scale-95 ${
                 showingShowroom
-                  ? 'bg-red-600 text-white border-red-600 shadow-sm'
-                  : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                  ? 'bg-racing text-white border-racing shadow-sm'
+                  : 'bg-racing-soft text-racing-ink border-red-200 hover:bg-red-100'
               }`}
             >
               <Box className="w-3.5 h-3.5" />
@@ -412,14 +412,14 @@ export default function BrandBookshelf({
       </div>
 
       {/* The Bookshelf Showcase Container */}
-      <div className="relative rounded-3xl cl-card cl-microgrid p-3 sm:p-6 overflow-hidden min-h-[450px] flex flex-col justify-end">
+      <div className="relative rounded-3xl cl-card p-3 sm:p-6 overflow-hidden min-h-[450px] flex flex-col justify-end">
         {/* Ambient Top Studio Lighting */}
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-red-50/40 to-transparent pointer-events-none"></div>
 
         {/* Floating Left Navigation Arrow Button */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/95 border border-black/[0.1] text-[#111318] flex items-center justify-center hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-90 transition shadow-lg backdrop-blur-md"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-surface/95 border border-black/[0.1] text-ink flex items-center justify-center hover:bg-racing hover:text-white hover:border-racing active:scale-90 transition shadow-lg backdrop-blur-md"
           title="Deslizar marcas a la izquierda"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
@@ -428,7 +428,7 @@ export default function BrandBookshelf({
         {/* Floating Right Navigation Arrow Button */}
         <button
           onClick={() => scroll('right')}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/95 border border-black/[0.1] text-[#111318] flex items-center justify-center hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-90 transition shadow-lg backdrop-blur-md"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-surface/95 border border-black/[0.1] text-ink flex items-center justify-center hover:bg-racing hover:text-white hover:border-racing active:scale-90 transition shadow-lg backdrop-blur-md"
           title="Deslizar marcas a la derecha"
         >
           <ChevronRight className="w-5 h-5 stroke-[2.5]" />
@@ -437,16 +437,16 @@ export default function BrandBookshelf({
         {/* Hovered Brand Live Status Tip */}
         <div className="text-center mb-2 z-20">
           {hoveredBrand ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-red-200 text-[11px] text-[#111318] font-mono shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface border border-red-200 text-[11px] text-ink font-mono shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-racing animate-pulse"></span>
               <span>{hoveredBrand}:</span>
-              <strong className="text-red-700">
+              <strong className="text-racing-ink">
                 {(brandGroups[hoveredBrand] || []).length} modelo(s) en tu garage
               </strong>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-slate-500">
-              <BookOpen className="w-3 h-3 text-red-500" />
+            <div className="inline-flex items-center gap-1.5 text-[10px] font-mono text-ink-muted">
+              <BookOpen className="w-3 h-3 text-racing-ink" />
               <span>Toca las flechas o desliza para explorar por marca</span>
             </div>
           )}

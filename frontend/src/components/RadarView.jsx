@@ -12,7 +12,7 @@ import {
   ExternalLink,
   RefreshCw,
   X
-} from 'lucide-react';
+} from './CarLogIcons';
 import { sound } from '../utils/audio';
 import { RARITY_CONFIG } from '../utils/demoData';
 import { getSupabase, isSupabaseConfigured } from '../utils/supabaseClient';
@@ -237,18 +237,18 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
       )}
 
       {/* White & Red Radar Telemetry Scope Instrument */}
-      <div className="relative rounded-3xl cl-card cl-microgrid p-5 overflow-hidden">
+      <div className="relative rounded-3xl cl-card p-5 overflow-hidden">
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
           {/* Circular Crisp White/Red Radar Dial */}
-          <div className="relative w-56 h-56 sm:w-60 sm:h-60 rounded-full border-2 border-red-500/30 bg-white flex items-center justify-center overflow-hidden shadow-[inset_0_0_28px_rgba(220,38,38,0.08)] shrink-0">
+          <div className="relative w-56 h-56 sm:w-60 sm:h-60 rounded-full border-2 border-red-500/30 bg-surface flex items-center justify-center overflow-hidden shadow-[inset_0_0_28px_rgba(220,38,38,0.08)] shrink-0">
             <div className="absolute w-44 h-44 rounded-full border border-red-500/20" />
             <div className="absolute w-28 h-28 rounded-full border border-red-500/25" />
             <div className="absolute w-14 h-14 rounded-full border border-red-500/30" />
 
-            <span className="absolute top-2 font-telemetry text-[8px] text-red-600/80 font-bold uppercase tracking-widest pointer-events-none">
+            <span className="absolute top-2 font-telemetry text-[8px] text-racing-ink font-bold uppercase tracking-widest pointer-events-none">
               {formatDistance(scopeMaxMeters)}
             </span>
-            <span className="absolute bottom-2 font-telemetry text-[8px] text-slate-500 uppercase tracking-widest pointer-events-none">
+            <span className="absolute bottom-2 font-telemetry text-[8px] text-ink-muted uppercase tracking-widest pointer-events-none">
               {gpsStatus === 'active' ? 'GPS · NORTE' : 'MODO ZONA'}
             </span>
 
@@ -331,10 +331,10 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
             </div>
 
             <div>
-              <h2 className="font-display text-3xl font-extrabold text-[#111318] uppercase tracking-tight leading-none">
+              <h2 className="font-display text-3xl font-extrabold text-ink uppercase tracking-tight leading-none">
                 Radar de Caza Callejera
               </h2>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-md mt-2 mx-auto md:mx-0">
+              <p className="text-xs text-ink-secondary leading-relaxed max-w-md mt-2 mx-auto md:mx-0">
                 Consultá avistamientos reales reportados en la calle, acercate con el mapa y escanealos en vivo para sumarlos a tu flota.
               </p>
             </div>
@@ -402,7 +402,7 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
               value={reportForm.brand}
               onChange={(e) => setReportForm((p) => ({ ...p, brand: e.target.value }))}
               placeholder="Marca (ej: Subaru)"
-              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing"
               required
             />
             <input
@@ -411,14 +411,14 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
               value={reportForm.model}
               onChange={(e) => setReportForm((p) => ({ ...p, model: e.target.value }))}
               placeholder="Modelo (ej: Impreza WRX)"
-              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing"
               required
             />
             <select
               aria-label="Rareza del vehículo"
               value={reportForm.rarity}
               onChange={(e) => setReportForm((p) => ({ ...p, rarity: e.target.value }))}
-              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing"
             >
               <option value="Común">Común</option>
               <option value="Raro">Raro</option>
@@ -431,7 +431,7 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
               value={reportForm.address}
               onChange={(e) => setReportForm((p) => ({ ...p, address: e.target.value }))}
               placeholder="Calle / Zona (opcional)"
-              className="px-3 py-2.5 rounded-xl bg-slate-50 border border-black/[0.1] text-xs text-[#111318] placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 focus:border-red-500"
+              className="px-3 py-2.5 rounded-xl bg-recessed border border-black/[0.1] text-xs text-ink placeholder-ink-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-racing/40 focus:border-racing"
             />
             <button
               type="submit"
@@ -449,10 +449,10 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-0.5">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-red-600" />
-            <h3 className="font-display text-xl font-extrabold uppercase tracking-tight text-[#111318]">
+            <h3 className="font-display text-xl font-extrabold uppercase tracking-tight text-ink">
               Avistamientos en Zona
             </h3>
-            <span className="text-[11px] text-slate-500 font-telemetry uppercase">
+            <span className="text-[11px] text-ink-muted font-telemetry uppercase">
               ({String(filteredSpots.length).padStart(2, '0')})
             </span>
           </div>
@@ -465,8 +465,8 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
                 onClick={() => setRadiusFilter(opt.id)}
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-telemetry font-bold uppercase transition ${
                   radiusFilter === opt.id
-                    ? 'bg-red-600 text-white'
-                    : 'bg-white border border-black/[0.08] text-slate-600 hover:text-red-600'
+                    ? 'bg-racing text-white'
+                    : 'bg-surface border border-black/[0.08] text-ink-secondary hover:text-racing-ink'
                 }`}
               >
                 {opt.label}
@@ -478,22 +478,22 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="rounded-2xl bg-white border border-black/[0.06] overflow-hidden animate-pulse">
-                <div className="h-40 bg-slate-100" />
+              <div key={n} className="rounded-2xl bg-surface border border-black/[0.06] overflow-hidden animate-pulse">
+                <div className="h-40 bg-recessed" />
                 <div className="p-4 space-y-3">
-                  <div className="h-4 w-2/3 bg-slate-200 rounded" />
-                  <div className="h-3 w-1/2 bg-slate-100 rounded" />
-                  <div className="h-9 w-full bg-slate-200 rounded-xl" />
+                  <div className="h-4 w-2/3 bg-recessed rounded" />
+                  <div className="h-3 w-1/2 bg-recessed rounded" />
+                  <div className="h-9 w-full bg-recessed rounded-xl" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredSpots.length === 0 ? (
           <div className="py-12 px-5 text-center rounded-3xl cl-card space-y-3">
-            <Radio className="w-7 h-7 text-red-600 mx-auto" />
+            <Radio className="w-7 h-7 text-racing-ink mx-auto" />
             <div className="space-y-1">
-              <h4 className="font-display text-xl font-bold uppercase text-[#111318]">Sin señales activas</h4>
-              <p className="text-xs text-slate-500 max-w-xs mx-auto">
+              <h4 className="font-display text-xl font-bold uppercase text-ink">Sin señales activas</h4>
+              <p className="text-xs text-ink-secondary max-w-xs mx-auto">
                 Todavía no hay reportes reales activos en este radio. Si ves un auto interesante en la calle, reportalo o escanealo.
               </p>
             </div>
@@ -581,41 +581,41 @@ export default function RadarView({ onSpotFound, savedCarIds = new Set() }) {
                   <div className="p-4 flex-1 flex flex-col justify-between gap-3">
                     <div>
                       <div className="flex items-baseline justify-between gap-2">
-                        <h4 className="font-display text-xl font-extrabold uppercase text-[#111318] tracking-tight truncate">
-                          {spot.brand} <span className="text-red-600 font-bold">{spot.model}</span>
+                        <h4 className="font-display text-xl font-extrabold uppercase text-ink tracking-tight truncate">
+                          {spot.brand} <span className="text-racing-ink font-bold">{spot.model}</span>
                         </h4>
-                        <span className="text-[11px] font-telemetry text-slate-500 shrink-0">{spot.year}</span>
+                        <span className="text-[11px] font-telemetry text-ink-muted shrink-0">{spot.year}</span>
                       </div>
 
-                      <p className="text-xs text-slate-600 mt-1 flex items-center gap-1.5 truncate">
-                        <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                      <p className="text-xs text-ink-secondary mt-1 flex items-center gap-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-racing-ink shrink-0" />
                         <span className="truncate">{spot.address || 'Zona Urbana'}</span>
                       </p>
 
                       {(spot.hp > 0 || spot.topSpeed > 0 || spot.zeroToHundred > 0) && (
                         <div className="grid grid-cols-3 divide-x divide-black/[0.07] rounded-xl cl-panel mt-3 py-1.5 text-center font-telemetry">
                           <div className="px-1">
-                            <span className="text-[8px] text-slate-500 uppercase block">CV</span>
-                            <span className="text-[11px] font-bold text-[#111318]">{spot.hp || '—'}</span>
+                            <span className="text-[8px] text-ink-muted uppercase block">CV</span>
+                            <span className="text-[11px] font-bold text-ink">{spot.hp || '—'}</span>
                           </div>
                           <div className="px-1">
-                            <span className="text-[8px] text-slate-500 uppercase block">0–100</span>
-                            <span className="text-[11px] font-bold text-[#111318]">
+                            <span className="text-[8px] text-ink-muted uppercase block">0–100</span>
+                            <span className="text-[11px] font-bold text-ink">
                               {spot.zeroToHundred ? `${spot.zeroToHundred}s` : '—'}
                             </span>
                           </div>
                           <div className="px-1">
-                            <span className="text-[8px] text-slate-500 uppercase block">KM/H</span>
-                            <span className="text-[11px] font-bold text-[#111318]">{spot.topSpeed || '—'}</span>
+                            <span className="text-[8px] text-ink-muted uppercase block">KM/H</span>
+                            <span className="text-[11px] font-bold text-ink">{spot.topSpeed || '—'}</span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between gap-2 mt-3 text-[11px] text-slate-500 border-t border-black/[0.06] pt-2.5 font-telemetry">
-                        <span className="flex items-center gap-1 text-red-600 font-semibold">
+                      <div className="flex items-center justify-between gap-2 mt-3 text-[11px] text-ink-muted border-t border-black/[0.06] pt-2.5 font-telemetry">
+                        <span className="flex items-center gap-1 text-racing-ink font-semibold">
                           <Clock className="w-3 h-3" /> {formatRemainingMinutes(spot.expiresAt)}
                         </span>
-                        <span className="truncate text-slate-500">{spot.spottedBy || 'Spotter'}</span>
+                        <span className="truncate text-ink-muted">{spot.spottedBy || 'Spotter'}</span>
                       </div>
                     </div>
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   ChevronLeft, ChevronRight, Zap, Shield, Gauge, Target, 
   MapPin, Heart, Settings, Camera, Flame, Award, Radio, Check, Volume2, Sparkles
-} from 'lucide-react';
+} from './CarLogIcons';
 import { POKEDEX_CARS } from '../utils/demoData';
 import { sound } from '../utils/audio';
 import { isCarInSavedSet } from '../utils/auth';
@@ -155,12 +155,12 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
               {/* Header Title with 'All >' */}
               <div className="flex items-baseline justify-between">
                 <div>
-                  <h2 className="text-2xl font-black text-zinc-900 tracking-tight">About</h2>
-                  <p className="text-xs font-bold text-zinc-400">{car.brand} • {car.generation} ({car.year})</p>
+                  <h2 className="font-display text-2xl font-black text-ink tracking-tight">About</h2>
+                  <p className="text-xs font-bold text-ink-muted">{car.brand} • {car.generation} ({car.year})</p>
                 </div>
                 <button 
                   onClick={() => setActiveSheet('hero')}
-                  className="text-xs font-bold text-zinc-400 hover:text-zinc-600 flex items-center"
+                  className="text-xs font-bold text-ink-muted hover:text-ink flex items-center"
                 >
                   Cerrar ×
                 </button>
@@ -169,48 +169,48 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
               {/* 4 Clean Stat Boxes (Attack, Protection, Health, Chance to catch) */}
               <div className="grid grid-cols-4 gap-2 pt-1">
                 {/* Stat 1: Potencia (Attack) */}
-                <div className="p-2.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 text-center shadow-sm">
-                  <div className="flex items-center justify-center text-amber-500 mb-1">
-                    <Zap className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <div className="p-2.5 rounded-2xl border border-black/[0.08] bg-canvas text-center shadow-sm">
+                  <div className="flex items-center justify-center text-amber-ink mb-1">
+                    <Zap className="w-4 h-4 fill-current text-amber-ink" />
                   </div>
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Potencia</div>
-                  <div className="text-base font-black text-zinc-800 mt-0.5">{car.hp}</div>
+                  <div className="text-[10px] font-bold text-ink-muted uppercase tracking-tighter">Potencia</div>
+                  <div className="text-base font-black text-ink mt-0.5">{car.hp}</div>
                 </div>
 
                 {/* Stat 2: 0-100 (Protection) */}
-                <div className="p-2.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 text-center shadow-sm">
-                  <div className="flex items-center justify-center text-blue-500 mb-1">
-                    <Shield className="w-4 h-4 text-blue-500" />
+                <div className="p-2.5 rounded-2xl border border-black/[0.08] bg-canvas text-center shadow-sm">
+                  <div className="flex items-center justify-center text-blue-700 mb-1">
+                    <Shield className="w-4 h-4 text-blue-700" />
                   </div>
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">0-100</div>
-                  <div className="text-base font-black text-zinc-800 mt-0.5">{car.zeroToHundred}</div>
+                  <div className="text-[10px] font-bold text-ink-muted uppercase tracking-tighter">0-100</div>
+                  <div className="text-base font-black text-ink mt-0.5">{car.zeroToHundred}</div>
                 </div>
 
                 {/* Stat 3: Vel. Máx (Health) */}
-                <div className="p-2.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 text-center shadow-sm">
-                  <div className="flex items-center justify-center text-emerald-500 mb-1">
-                    <Gauge className="w-4 h-4 text-emerald-500" />
+                <div className="p-2.5 rounded-2xl border border-black/[0.08] bg-canvas text-center shadow-sm">
+                  <div className="flex items-center justify-center text-emerald-ink mb-1">
+                    <Gauge className="w-4 h-4 text-emerald-ink" />
                   </div>
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Vel. Máx</div>
-                  <div className="text-sm font-black text-zinc-800 mt-0.5 leading-tight">{car.topSpeed.split(' ')[0]}</div>
+                  <div className="text-[10px] font-bold text-ink-muted uppercase tracking-tighter">Vel. Máx</div>
+                  <div className="text-sm font-black text-ink mt-0.5 leading-tight">{car.topSpeed.split(' ')[0]}</div>
                 </div>
 
                 {/* Stat 4: Chance to catch / Rareza */}
-                <div className="p-2.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 text-center shadow-sm">
-                  <div className="flex items-center justify-center text-red-500 mb-1">
-                    <Target className="w-4 h-4 text-red-500" />
+                <div className="p-2.5 rounded-2xl border border-black/[0.08] bg-canvas text-center shadow-sm">
+                  <div className="flex items-center justify-center text-racing-ink mb-1">
+                    <Target className="w-4 h-4 text-racing-ink" />
                   </div>
-                  <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Spawn</div>
-                  <div className="text-base font-black text-zinc-800 mt-0.5">{car.catchRate}</div>
+                  <div className="text-[10px] font-bold text-ink-muted uppercase tracking-tighter">Spawn</div>
+                  <div className="text-base font-black text-ink mt-0.5">{car.catchRate}</div>
                 </div>
               </div>
 
               {/* Where to catch this car? */}
               <div className="space-y-1.5 pt-1">
-                <h4 className="text-sm font-black text-zinc-900 text-center">
+                <h4 className="font-display text-sm font-black text-ink text-center">
                   Where to catch {car.name}?
                 </h4>
-                <p className="text-[11px] text-zinc-500 text-center leading-relaxed px-2">
+                <p className="text-[11px] text-ink-secondary text-center leading-relaxed px-2">
                   {car.whereToCatch}
                 </p>
                 <p className="text-[10px] font-mono font-bold text-amber-600 text-center">
@@ -304,7 +304,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
         )}
 
         {/* Bottom App Bar (Pokédex, CarLog Center, Heart, Settings) */}
-        <div className="relative z-30 pt-3 pb-2 px-6 bg-white/95 backdrop-blur-md rounded-b-[42px] -mx-4 -mb-4 border-t border-zinc-200/80 flex items-center justify-between text-zinc-400">
+        <div className="relative z-30 pt-3 pb-2 px-6 bg-surface/95 backdrop-blur-md rounded-b-[42px] -mx-4 -mb-4 border-t border-black/[0.08] flex items-center justify-between text-ink-muted">
           {/* Pokédex / Garage Icon */}
           <button 
             onClick={onOpenRadar}
@@ -351,7 +351,7 @@ export default function PokemonCarMockup({ onOpenScanner, onOpenRadar, onSaveToG
       </div>
 
       {/* Swipe / Switch helper text */}
-      <div className="flex items-center gap-4 mt-4 text-xs font-semibold text-zinc-400">
+      <div className="flex items-center gap-4 mt-4 text-xs font-semibold text-pit-muted">
         <button onClick={prevCar} className="hover:text-white flex items-center gap-1">
           <ChevronLeft className="w-4 h-4" /> Anterior
         </button>

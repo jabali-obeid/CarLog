@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { RotateCw, RefreshCw, Eye } from 'lucide-react';
+import { RotateCw, RefreshCw, Eye } from './CarLogIcons';
 
 export default function Car3DViewer({
   car,
@@ -406,7 +406,7 @@ export default function Car3DViewer({
     let targetGlb = null;
     if (car?.model3dUrl && car.model3dUrl.endsWith('.glb')) {
       targetGlb = car.model3dUrl;
-    } 
+    }
     // Complete Argentine Popular & Street Cars Mapping (.GLB models)
     // --- VOLKSWAGEN ---
     else if (cleanBrand.includes('volkswagen') || cleanBrand.includes('vw')) {
@@ -1008,11 +1008,10 @@ export default function Car3DViewer({
 
   return (
     <div
-      className={`relative w-full ${
-        isLightStudio
+      className={`relative w-full ${isLightStudio
           ? 'h-[320px] sm:h-[380px] bg-transparent'
           : 'h-[400px] sm:h-[460px] rounded-2xl bg-[#06070a]'
-      } overflow-hidden`}
+        } overflow-hidden`}
     >
       {/* Subtle Studio Brand Watermark Behind Car (Light Studio Only) */}
       {isLightStudio && (
@@ -1032,16 +1031,14 @@ export default function Car3DViewer({
       {/* Loading Overlay */}
       {loading && (
         <div
-          className={`absolute inset-0 backdrop-blur-sm flex flex-col items-center justify-center text-xs font-mono font-bold gap-2.5 z-30 ${
-            isLightStudio
+          className={`absolute inset-0 backdrop-blur-sm flex flex-col items-center justify-center text-xs font-mono font-bold gap-2.5 z-30 ${isLightStudio
               ? 'bg-[#f7f8fa]/75 text-[#111318]'
               : 'bg-black/75 text-zinc-200'
-          }`}
+            }`}
         >
           <div
-            className={`w-7 h-7 border-2 border-t-transparent rounded-full animate-spin ${
-              isLightStudio ? 'border-[#111318]' : 'border-zinc-200'
-            }`}
+            className={`w-7 h-7 border-2 border-t-transparent rounded-full animate-spin ${isLightStudio ? 'border-[#111318]' : 'border-zinc-200'
+              }`}
           />
           <span>
             {loadProgress > 0 ? `Cargando Modelo 3D (${loadProgress}%)...` : 'Cargando Malla 3D...'}
@@ -1062,15 +1059,14 @@ export default function Car3DViewer({
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20">
         <button
           onClick={() => setAutoRotate(!autoRotate)}
-          className={`p-2 rounded-full border backdrop-blur-md text-xs transition ${
-            isLightStudio
+          className={`p-2 rounded-full border backdrop-blur-md text-xs transition ${isLightStudio
               ? autoRotate
-                ? 'bg-[#111318] border-[#111318] text-white shadow-sm'
-                : 'bg-white/90 border-black/10 text-zinc-600 hover:text-[#111318] shadow-xs'
+                ? 'bg-ink border-ink text-white shadow-sm'
+                : 'bg-white/95 border-black/10 text-ink-secondary hover:text-ink shadow-xs'
               : autoRotate
                 ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                : 'bg-black/60 border-white/10 text-zinc-400 hover:text-white'
-          }`}
+                : 'bg-black/65 border-white/15 text-pit-muted hover:text-white'
+            }`}
           title={autoRotate ? 'Pausar rotación automática' : 'Activar rotación automática'}
         >
           <RotateCw className="w-3.5 h-3.5" />
@@ -1078,11 +1074,10 @@ export default function Car3DViewer({
 
         <button
           onClick={resetCamera}
-          className={`p-2 rounded-full border backdrop-blur-md transition text-xs ${
-            isLightStudio
-              ? 'bg-white/90 hover:bg-white border-black/10 text-zinc-600 hover:text-[#111318] shadow-xs'
-              : 'bg-black/60 hover:bg-black/80 border-white/10 text-zinc-400 hover:text-white'
-          }`}
+          className={`p-2 rounded-full border backdrop-blur-md transition text-xs ${isLightStudio
+              ? 'bg-white/95 hover:bg-white border-black/10 text-ink-secondary hover:text-ink shadow-xs'
+              : 'bg-black/65 hover:bg-black/80 border-white/15 text-pit-muted hover:text-white'
+            }`}
           title="Centrar cámara"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -1091,13 +1086,12 @@ export default function Car3DViewer({
 
       {/* Gesture Hint at the Bottom */}
       <div
-        className={`absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-md border text-[10px] font-mono pointer-events-none flex items-center gap-1.5 z-20 ${
-          isLightStudio
-            ? 'bg-white/85 border-black/[0.08] text-zinc-500 shadow-xs'
-            : 'bg-black/60 border-white/10 text-zinc-400 shadow'
-        }`}
+        className={`absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-md border text-[10px] font-mono pointer-events-none flex items-center gap-1.5 z-20 ${isLightStudio
+            ? 'bg-white/95 border-black/[0.08] text-ink-secondary shadow-xs'
+            : 'bg-black/70 border-white/15 text-pit-muted shadow'
+          }`}
       >
-        <Eye className={`w-3 h-3 ${isLightStudio ? 'text-zinc-600' : 'text-zinc-300'}`} />
+        <Eye className={`w-3 h-3 ${isLightStudio ? 'text-ink-secondary' : 'text-pit-muted'}`} />
         Arrastra para girar 360°
       </div>
     </div>

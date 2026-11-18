@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Search, SlidersHorizontal, ArrowUpRight, LayoutGrid, Rows3,
   Check, X, ArrowUpDown, BookOpen, Box
-} from 'lucide-react';
+} from './CarLogIcons';
 import { isCarInSavedSet } from '../utils/auth';
 
 const RARITY_OPTIONS = ['Todos', 'Legendario', 'Histórico', 'Raro', 'Común', 'Básico'];
@@ -76,13 +76,13 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
       <div className="relative z-10 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h3
-            className={`font-sans font-bold text-[#111318] tracking-tight leading-snug truncate ${
+            className={`font-display font-bold text-ink tracking-tight leading-snug truncate ${
               isTwoCol ? 'text-[13px]' : 'text-[16px]'
             }`}
           >
             {car.brand} {modelName}
           </h3>
-          <p className={`text-[#6b7280] font-medium truncate mt-0.5 ${isTwoCol ? 'text-[10px]' : 'text-[11px]'}`}>
+          <p className={`text-ink-muted font-medium truncate mt-0.5 ${isTwoCol ? 'text-[10px]' : 'text-[11px]'}`}>
             {isTwoCol ? `${car.rarity || 'Showroom'} · ${car.year || '2024'}` : `${compactEngine} · ${car.year || '2024'}`}
           </p>
         </div>
@@ -161,28 +161,28 @@ function ShowroomCard({ car, isFeatured, isSaved, layout, onSelectFeatured, onOp
       <div className="relative z-10 space-y-2.5 pt-1">
         <div className="grid grid-cols-3 gap-1.5 items-end">
           <div>
-            <div className={`font-telemetry font-bold text-[#111318] leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
+            <div className={`font-telemetry font-bold text-ink leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
               {hpNum} CV
             </div>
-            <div className={`text-[#6b7280] font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
+            <div className={`text-ink-muted font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
               Potencia
             </div>
           </div>
 
           <div className="text-center">
-            <div className={`font-telemetry font-bold text-[#111318] leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
+            <div className={`font-telemetry font-bold text-ink leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
               {zeroNum} s
             </div>
-            <div className={`text-[#6b7280] font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
+            <div className={`text-ink-muted font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
               0–100 km/h
             </div>
           </div>
 
           <div className="text-right">
-            <div className={`font-telemetry font-bold text-[#111318] leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
+            <div className={`font-telemetry font-bold text-ink leading-tight ${isTwoCol ? 'text-[11px]' : 'text-[13px]'}`}>
               {speedNum} km/h
             </div>
-            <div className={`text-[#6b7280] font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
+            <div className={`text-ink-muted font-medium ${isTwoCol ? 'text-[9px]' : 'text-[10px]'}`}>
               Vel. Máx
             </div>
           </div>
@@ -295,7 +295,7 @@ export default function ShowroomGallery({
   };
 
   return (
-    <div className="min-h-full bg-[#f4f5f7] text-[#111318] px-3.5 pt-3.5 pb-6 space-y-3.5 select-none">
+    <div className="min-h-full bg-canvas text-ink px-3.5 pt-3.5 pb-6 space-y-3.5 select-none">
       {/* Studio Header Bar (matches CARZONE "In Stock (27)" + Sort + View Toggle) */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -303,18 +303,18 @@ export default function ShowroomGallery({
             <button
               type="button"
               onClick={onBackToBookshelf}
-              className="h-8 px-2.5 rounded-xl bg-white hover:bg-zinc-100 border border-black/[0.08] text-[11px] font-semibold text-[#111318] flex items-center gap-1.5 shadow-xs transition active:scale-95 shrink-0"
+              className="h-8 px-2.5 rounded-xl bg-surface hover:bg-recessed border border-black/[0.08] text-[11px] font-semibold text-ink flex items-center gap-1.5 shadow-xs transition active:scale-95 shrink-0"
               title="Volver a Mi Estantería"
             >
-              <BookOpen className="w-3.5 h-3.5 text-zinc-600" />
+              <BookOpen className="w-3.5 h-3.5 text-ink-secondary" />
               <span>Mi Flota</span>
             </button>
           )}
           <div className="flex items-baseline gap-1.5 min-w-0">
-            <h2 className="font-sans text-[20px] font-bold tracking-tight text-[#111318] truncate">
+            <h2 className="font-display text-[20px] font-bold tracking-tight text-ink truncate">
               {title}
             </h2>
-            <span className="font-telemetry text-sm font-medium text-[#6b7280] shrink-0">
+            <span className="font-telemetry text-sm font-medium text-ink-muted shrink-0">
               ({filteredCars.length})
             </span>
           </div>
@@ -324,20 +324,20 @@ export default function ShowroomGallery({
           <button
             type="button"
             onClick={cycleSort}
-            className="h-8 px-2.5 rounded-full bg-white hover:bg-zinc-100 border border-black/[0.08] text-[11px] font-semibold text-[#111318] flex items-center gap-1 transition active:scale-95"
+            className="h-8 px-2.5 rounded-full bg-surface hover:bg-recessed border border-black/[0.08] text-[11px] font-semibold text-ink flex items-center gap-1 transition active:scale-95"
             title="Cambiar orden"
           >
             <span>{currentSortLabel}</span>
-            <ArrowUpDown className="w-3 h-3 text-zinc-500" />
+            <ArrowUpDown className="w-3 h-3 text-ink-muted" />
           </button>
 
-          <div className="h-8 p-0.5 rounded-xl bg-white border border-black/[0.08] flex items-center">
+          <div className="h-8 p-0.5 rounded-xl bg-surface border border-black/[0.08] flex items-center">
             <button
               type="button"
               onClick={() => setLayout('grid')}
               aria-label="Vista en grilla"
               className={`w-7 h-6.5 rounded-lg flex items-center justify-center transition ${
-                layout === 'grid' ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                layout === 'grid' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -347,7 +347,7 @@ export default function ShowroomGallery({
               onClick={() => setLayout('single')}
               aria-label="Vista amplia"
               className={`w-7 h-6.5 rounded-lg flex items-center justify-center transition ${
-                layout === 'single' ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                layout === 'single' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
               }`}
             >
               <Rows3 className="w-3.5 h-3.5" />
@@ -359,20 +359,20 @@ export default function ShowroomGallery({
       {/* Search + Filters Pill Strip */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar marca o modelo..."
-            className="w-full h-9 pl-8 pr-8 rounded-xl bg-white border border-black/[0.08] text-xs font-medium text-[#111318] placeholder-zinc-400 focus:outline-none focus:border-black/25 shadow-2xs"
+            className="w-full h-9 pl-8 pr-8 rounded-xl bg-surface border border-black/[0.09] text-xs font-medium text-ink placeholder-ink-muted focus:outline-none focus:border-black/25 shadow-2xs"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               aria-label="Limpiar búsqueda"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#111318]"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -384,14 +384,14 @@ export default function ShowroomGallery({
           onClick={() => setFiltersOpen((v) => !v)}
           className={`h-9 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shrink-0 ${
             filtersOpen || activeFilterCount > 0
-              ? 'bg-[#111318] text-white border-[#111318]'
-              : 'bg-white text-[#111318] border-black/[0.08] hover:bg-zinc-100'
+              ? 'bg-ink text-white border-ink'
+              : 'bg-surface text-ink border-black/[0.09] hover:bg-recessed'
           }`}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span>Filtros</span>
           {activeFilterCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-red-600 text-white font-telemetry text-[10px] font-bold">
+            <span className="px-1.5 py-0.2 rounded-full bg-racing text-white font-telemetry text-[10px] font-bold">
               {activeFilterCount}
             </span>
           )}
@@ -405,8 +405,8 @@ export default function ShowroomGallery({
           onClick={() => setSelectedBrands([])}
           className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap border transition active:scale-95 shrink-0 ${
             selectedBrands.length === 0
-              ? 'bg-[#111318] text-white border-[#111318]'
-              : 'bg-white text-[#4b5563] border-black/[0.08] hover:text-[#111318]'
+              ? 'bg-ink text-white border-ink'
+              : 'bg-surface text-ink-secondary border-black/[0.09] hover:text-ink'
           }`}
         >
           Todas
@@ -420,12 +420,12 @@ export default function ShowroomGallery({
               onClick={() => toggleBrand(b.name)}
               className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold whitespace-nowrap border transition active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 active
-                  ? 'bg-[#111318] text-white border-[#111318]'
-                  : 'bg-white text-[#4b5563] border-black/[0.08] hover:text-[#111318]'
+                  ? 'bg-ink text-white border-ink'
+                  : 'bg-surface text-ink-secondary border-black/[0.09] hover:text-ink'
               }`}
             >
               <span>{b.name}</span>
-              <span className={`font-telemetry text-[10px] ${active ? 'text-zinc-300' : 'text-zinc-400'}`}>
+              <span className={`font-telemetry text-[10px] ${active ? 'text-pit-muted' : 'text-ink-muted'}`}>
                 {b.count}
               </span>
             </button>
@@ -435,16 +435,16 @@ export default function ShowroomGallery({
 
       {/* Expandable Filter Panel (CARZONE Left-Sidebar style adapted for mobile) */}
       {filtersOpen && (
-        <div className="rounded-2xl bg-white border border-black/[0.08] p-3.5 shadow-md space-y-3.5 animate-fade-in">
+        <div className="rounded-2xl bg-surface border border-black/[0.08] p-3.5 shadow-md space-y-3.5 animate-fade-in">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-telemetry font-bold uppercase tracking-widest text-[#6b7280]">
+            <span className="text-[10px] font-telemetry font-bold uppercase tracking-widest text-ink-muted">
               Refinar Showroom
             </span>
             {activeFilterCount > 0 && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-[11px] font-semibold text-red-600 hover:underline"
+                className="text-[11px] font-semibold text-racing-ink hover:underline"
               >
                 Limpiar todo
               </button>
@@ -453,7 +453,7 @@ export default function ShowroomGallery({
 
           {/* Rarity Chips */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-[#6b7280] block">
+            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-ink-muted block">
               Categoría / Rareza
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -466,8 +466,8 @@ export default function ShowroomGallery({
                     onClick={() => setSelectedRarity(rarity)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition ${
                       active
-                        ? 'bg-[#111318] text-white border-[#111318]'
-                        : 'bg-[#f8f9fb] text-[#4b5563] border-black/[0.07] hover:text-[#111318]'
+                        ? 'bg-ink text-white border-ink'
+                        : 'bg-canvas text-ink-secondary border-black/[0.08] hover:text-ink'
                     }`}
                   >
                     {rarity}
@@ -479,7 +479,7 @@ export default function ShowroomGallery({
 
           {/* Power Threshold */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-[#6b7280] block">
+            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-ink-muted block">
               Potencia Mínima
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -492,8 +492,8 @@ export default function ShowroomGallery({
                     onClick={() => setMinHp(preset.minHp)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-telemetry font-semibold border transition ${
                       active
-                        ? 'bg-[#111318] text-white border-[#111318]'
-                        : 'bg-[#f8f9fb] text-[#4b5563] border-black/[0.07] hover:text-[#111318]'
+                        ? 'bg-ink text-white border-ink'
+                        : 'bg-canvas text-ink-secondary border-black/[0.08] hover:text-ink'
                     }`}
                   >
                     {preset.label}
@@ -505,7 +505,7 @@ export default function ShowroomGallery({
 
           {/* Brand Checkboxes */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-[#6b7280] block">
+            <span className="text-[10px] font-telemetry font-bold uppercase tracking-wider text-ink-muted block">
               Marcas
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1">
@@ -516,18 +516,18 @@ export default function ShowroomGallery({
                     type="button"
                     key={b.name}
                     onClick={() => toggleBrand(b.name)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#f4f5f7] text-left transition"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-canvas text-left transition"
                   >
                     <span
                       className={`w-4 h-4 rounded-[5px] border flex items-center justify-center shrink-0 transition ${
                         checked
-                          ? 'bg-[#111318] border-[#111318] text-white'
-                          : 'bg-white border-black/20'
+                          ? 'bg-ink border-ink text-white'
+                          : 'bg-surface border-black/20'
                       }`}
                     >
                       {checked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </span>
-                    <span className={`text-xs truncate ${checked ? 'font-bold text-[#111318]' : 'text-[#4b5563]'}`}>
+                    <span className={`text-xs truncate ${checked ? 'font-bold text-ink' : 'text-ink-secondary'}`}>
                       {b.name}
                     </span>
                   </button>
@@ -542,19 +542,19 @@ export default function ShowroomGallery({
       {loadingCatalog && filteredCars.length === 0 ? (
         <div className="grid grid-cols-1 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[24px] bg-white border border-black/[0.06] p-5 h-60 animate-pulse" />
+            <div key={i} className="rounded-[24px] bg-surface border border-black/[0.06] p-5 h-60 animate-pulse" />
           ))}
         </div>
       ) : filteredCars.length === 0 ? (
-        <div className="rounded-[24px] bg-white border border-black/[0.07] p-8 text-center space-y-3">
-          <p className="text-sm font-bold text-[#111318]">No hay modelos con esos filtros</p>
-          <p className="text-xs text-[#6b7280]">
+        <div className="rounded-[24px] bg-surface border border-black/[0.08] p-8 text-center space-y-3">
+          <p className="text-sm font-bold text-ink">No hay modelos con esos filtros</p>
+          <p className="text-xs text-ink-muted">
             Prueba limpiando la búsqueda o seleccionando otra marca/rareza.
           </p>
           <button
             type="button"
             onClick={clearFilters}
-            className="px-4 py-2 rounded-xl bg-[#111318] text-white text-xs font-semibold hover:bg-[#232834] transition active:scale-95"
+            className="px-4 py-2 rounded-xl bg-ink text-white text-xs font-semibold hover:bg-pit-surface transition active:scale-95"
           >
             Restablecer filtros
           </button>

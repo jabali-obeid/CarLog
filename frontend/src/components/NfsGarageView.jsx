@@ -3,7 +3,7 @@ import {
   ChevronLeft, ChevronRight, Zap, Gauge, Award,
   Trash2, ShieldCheck, Sparkles, Sliders, Box, Image, BookOpen, Check,
   Sun, Moon, Cpu
-} from 'lucide-react';
+} from './CarLogIcons';
 import { RARITY_CONFIG } from '../utils/demoData';
 import { isCarInSavedSet } from '../utils/auth';
 import Car3DViewer from './Car3DViewer';
@@ -106,7 +106,7 @@ export default function NfsGarageView({
 
   if (garage.length === 0) {
     return (
-      <div className="py-16 px-6 text-center space-y-4 rounded-3xl cl-card cl-microgrid">
+      <div className="py-16 px-6 text-center space-y-4 rounded-3xl cl-card">
         <div className="w-16 h-16 rounded-2xl bg-red-600/12 border border-red-500/30 flex items-center justify-center mx-auto text-red-400 shadow-inner">
           <Warehouse className="w-7 h-7" />
         </div>
@@ -169,13 +169,13 @@ export default function NfsGarageView({
             <button
               type="button"
               onClick={onBackToBookshelf}
-              className="h-8 px-3 rounded-full bg-white hover:bg-zinc-100 border border-black/[0.08] text-[#111318] text-[11px] font-semibold transition flex items-center gap-1.5 shadow-2xs active:scale-95"
+              className="h-8 px-3 rounded-full bg-surface hover:bg-recessed border border-black/[0.08] text-ink text-[11px] font-semibold transition flex items-center gap-1.5 shadow-2xs active:scale-95"
             >
-              <ChevronLeft className="w-3.5 h-3.5 text-zinc-600" />
+              <ChevronLeft className="w-3.5 h-3.5 text-ink-secondary" />
               <span>Volver</span>
             </button>
           ) : (
-            <span className="text-[11px] font-telemetry uppercase tracking-wider text-zinc-500">
+            <span className="text-[11px] font-telemetry uppercase tracking-wider text-ink-muted">
               {selectedBrandTitle || 'Showroom'}
             </span>
           )}
@@ -185,20 +185,20 @@ export default function NfsGarageView({
               <button
                 type="button"
                 onClick={onToggleStudioTheme}
-                className="h-8 px-2.5 rounded-full bg-white hover:bg-zinc-100 border border-black/[0.08] text-[11px] font-semibold text-[#111318] flex items-center gap-1 shadow-2xs transition active:scale-95"
+                className="h-8 px-2.5 rounded-full bg-surface hover:bg-recessed border border-black/[0.08] text-[11px] font-semibold text-ink flex items-center gap-1 shadow-2xs transition active:scale-95"
                 title="Cambiar a Taller Oscuro"
               >
-                <Moon className="w-3.5 h-3.5 text-zinc-600" />
+                <Moon className="w-3.5 h-3.5 text-ink-secondary" />
                 <span>Noche</span>
               </button>
             )}
 
-            <div className="h-8 p-0.5 rounded-full bg-white border border-black/[0.08] flex items-center shadow-2xs">
+            <div className="h-8 p-0.5 rounded-full bg-surface border border-black/[0.08] flex items-center shadow-2xs">
               <button
                 type="button"
                 onClick={() => setViewMode3D(true)}
                 className={`px-2.5 h-full rounded-full text-[11px] font-semibold transition flex items-center gap-1 ${
-                  viewMode3D ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                  viewMode3D ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
                 }`}
               >
                 <Box className="w-3 h-3" />
@@ -208,7 +208,7 @@ export default function NfsGarageView({
                 type="button"
                 onClick={() => setViewMode3D(false)}
                 className={`px-2.5 h-full rounded-full text-[11px] font-semibold transition flex items-center gap-1 ${
-                  !viewMode3D ? 'bg-[#111318] text-white' : 'text-zinc-500 hover:text-[#111318]'
+                  !viewMode3D ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink'
                 }`}
               >
                 <Image className="w-3 h-3" />
@@ -216,8 +216,8 @@ export default function NfsGarageView({
               </button>
             </div>
 
-            <div className="h-8 px-2.5 rounded-full bg-white border border-black/[0.08] font-telemetry text-[11px] flex items-center text-zinc-500">
-              <span className="text-[#111318] font-bold">{String(safeIndex + 1).padStart(2, '0')}</span>
+            <div className="h-8 px-2.5 rounded-full bg-surface border border-black/[0.08] font-telemetry text-[11px] flex items-center text-ink-muted">
+              <span className="text-ink font-bold">{String(safeIndex + 1).padStart(2, '0')}</span>
               <span>/{String(garage.length).padStart(2, '0')}</span>
             </div>
           </div>
@@ -227,14 +227,14 @@ export default function NfsGarageView({
         <div className="flex items-start justify-between gap-3 px-0.5">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-4xl font-extrabold tracking-tight text-[#111318] leading-none truncate">
+              <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink leading-none truncate">
                 {currentCar.brand}
               </h1>
-              <span className="px-2 py-0.5 rounded-full bg-white border border-black/[0.08] text-[10px] font-telemetry font-semibold text-zinc-600 shrink-0">
+              <span className="px-2 py-0.5 rounded-full bg-surface border border-black/[0.08] text-[10px] font-telemetry font-semibold text-ink-secondary shrink-0">
                 {currentCar.year || '2024'}
               </span>
             </div>
-            <p className="text-base font-medium text-[#6b7280] mt-1 truncate">
+            <p className="text-base font-medium text-ink-secondary mt-1 truncate">
               {currentCar.model || currentCar.name}
             </p>
           </div>
@@ -247,12 +247,12 @@ export default function NfsGarageView({
                 if (safeIndex > 0) setSelectedIndex(safeIndex - 1);
               }}
               title="Quitar del Garage"
-              className="h-8 px-2.5 rounded-full bg-white hover:bg-red-50 border border-black/[0.08] hover:border-red-200 text-zinc-500 hover:text-red-600 transition flex items-center gap-1 text-[11px] font-semibold shrink-0"
+              className="h-8 px-2.5 rounded-full bg-surface hover:bg-racing-soft border border-black/[0.08] hover:border-red-200 text-ink-muted hover:text-racing-ink transition flex items-center gap-1 text-[11px] font-semibold shrink-0"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           ) : isSavedCurrent ? (
-            <span className="h-8 px-3 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shrink-0 bg-red-50 text-red-700 border border-red-200">
+            <span className="h-8 px-3 rounded-full text-[11px] font-semibold flex items-center gap-1.5 shrink-0 bg-racing-soft text-racing-ink border border-red-200">
               <Check className="w-3.5 h-3.5" />
               <span>En tu Garage</span>
             </span>
@@ -328,50 +328,50 @@ export default function NfsGarageView({
         {/* Feature Highlights Grid (AMMO Bottom Strip adapted vertically) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-sm font-bold text-[#111318]">Feature Highlights</h2>
-            <span className="text-[10px] font-telemetry uppercase tracking-wider text-zinc-500">
+            <h2 className="font-display text-sm font-bold text-ink">Feature Highlights</h2>
+            <span className="text-[10px] font-telemetry uppercase tracking-wider text-ink-muted">
               {currentCar.country || 'Global'} · {currentCar.rarity || 'Showroom'}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
-                <Cpu className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="rounded-2xl bg-surface border border-black/[0.08] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">
+                <Cpu className="w-3.5 h-3.5 text-ink-muted" />
                 <span>Motor</span>
               </div>
-              <div className="text-xs font-bold text-[#111318] mt-1.5 leading-snug line-clamp-2">
+              <div className="text-xs font-bold text-ink mt-1.5 leading-snug line-clamp-2">
                 {currentCar.engine || 'Motorización de serie'}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
-                <Zap className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="rounded-2xl bg-surface border border-black/[0.08] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">
+                <Zap className="w-3.5 h-3.5 text-ink-muted" />
                 <span>Potencia</span>
               </div>
-              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
-                {currentCar.hp || 200} <span className="text-xs font-medium text-zinc-500">CV</span>
+              <div className="font-telemetry text-xl font-bold text-ink mt-1">
+                {currentCar.hp || 200} <span className="text-xs font-medium text-ink-muted">CV</span>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
-                <Gauge className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="rounded-2xl bg-surface border border-black/[0.08] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">
+                <Gauge className="w-3.5 h-3.5 text-ink-muted" />
                 <span>Aceleración</span>
               </div>
-              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
-                {currentCar.zeroToHundred || 5.2} <span className="text-xs font-medium text-zinc-500">s · 0–100</span>
+              <div className="font-telemetry text-xl font-bold text-ink mt-1">
+                {currentCar.zeroToHundred || 5.2} <span className="text-xs font-medium text-ink-muted">s · 0–100</span>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-black/[0.07] p-3 shadow-2xs">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500">
-                <Award className="w-3.5 h-3.5 text-zinc-400" />
+            <div className="rounded-2xl bg-surface border border-black/[0.08] p-3 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-ink-muted">
+                <Award className="w-3.5 h-3.5 text-ink-muted" />
                 <span>Vel. Máx</span>
               </div>
-              <div className="font-telemetry text-xl font-bold text-[#111318] mt-1">
-                {currentCar.topSpeed || 240} <span className="text-xs font-medium text-zinc-500">km/h</span>
+              <div className="font-telemetry text-xl font-bold text-ink mt-1">
+                {currentCar.topSpeed || 240} <span className="text-xs font-medium text-ink-muted">km/h</span>
               </div>
             </div>
           </div>
@@ -379,12 +379,12 @@ export default function NfsGarageView({
 
         {/* Contrast Editorial Highlight Card (like AMMO dark callout) */}
         {currentCar.funFact && (
-          <div className="rounded-2xl bg-[#18191d] text-white p-3.5 shadow-sm space-y-1">
-            <div className="flex items-center justify-between text-[10px] font-telemetry uppercase tracking-wider text-zinc-400">
+          <div className="rounded-2xl bg-pit text-white p-3.5 shadow-sm space-y-1">
+            <div className="flex items-center justify-between text-[10px] font-telemetry uppercase tracking-wider text-pit-muted">
               <span>{currentCar.rarity || 'Ficha Técnica'}</span>
               <span>{currentCar.color || 'Serie'}</span>
             </div>
-            <p className="text-xs text-zinc-200 leading-relaxed">
+            <p className="text-xs text-ink-inverse leading-relaxed">
               {currentCar.funFact}
             </p>
           </div>
@@ -393,10 +393,10 @@ export default function NfsGarageView({
         {/* Light Bay Thumbnails Strip */}
         <div>
           <div className="flex items-center justify-between mb-2 px-0.5">
-            <span className="text-[10px] font-telemetry font-bold text-zinc-500 uppercase tracking-widest">
+            <span className="text-[10px] font-telemetry font-bold text-ink-muted uppercase tracking-widest">
               Modelos en Showroom
             </span>
-            <span className="text-[10px] font-telemetry text-zinc-400">
+            <span className="text-[10px] font-telemetry text-ink-muted">
               {garage.length} {garage.length === 1 ? 'unidad' : 'unidades'}
             </span>
           </div>
@@ -410,11 +410,11 @@ export default function NfsGarageView({
                   onClick={() => setSelectedIndex(idx)}
                   className={`flex-shrink-0 w-32 p-2 rounded-2xl border text-left transition-all cursor-pointer snap-start active:scale-[0.97] ${
                     isSelected
-                      ? 'bg-white border-[#111318] ring-1 ring-[#111318]/20 shadow-sm'
-                      : 'bg-white/80 border-black/[0.07] hover:border-black/20 opacity-75 hover:opacity-100'
+                      ? 'bg-surface border-ink ring-1 ring-ink/20 shadow-sm'
+                      : 'bg-surface/90 border-black/[0.08] hover:border-black/25'
                   }`}
                 >
-                  <div className="h-14 w-full flex items-center justify-center bg-[#f4f5f7] rounded-xl overflow-hidden mb-1.5">
+                  <div className="h-14 w-full flex items-center justify-center bg-canvas rounded-xl overflow-hidden mb-1.5">
                     <img
                       src={carItem.cutoutImage || carItem.imageUrl || carItem.image}
                       alt={carItem.model || carItem.name}
@@ -422,14 +422,14 @@ export default function NfsGarageView({
                     />
                   </div>
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-display text-xs font-extrabold uppercase text-[#111318] truncate">
+                    <span className="font-display text-xs font-extrabold uppercase text-ink truncate">
                       {carItem.brand}
                     </span>
-                    <span className="font-telemetry text-[9px] text-zinc-500 shrink-0">
+                    <span className="font-telemetry text-[9px] text-ink-muted shrink-0">
                       {carItem.hp || 0}CV
                     </span>
                   </div>
-                  <div className="text-[10px] font-medium text-zinc-500 truncate">
+                  <div className="text-[10px] font-medium text-ink-secondary truncate">
                     {carItem.model || carItem.name}
                   </div>
                 </button>
@@ -523,7 +523,7 @@ export default function NfsGarageView({
       </div>
 
       {/* Main Underground Showroom Bay Viewport */}
-      <div className="relative rounded-3xl cl-card cl-microgrid overflow-hidden flex flex-col justify-between">
+      <div className="relative rounded-3xl cl-card overflow-hidden flex flex-col justify-between">
         {/* Overhead Showroom Studio Light Diffusers */}
         <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white/[0.045] to-transparent flex justify-center gap-8 px-10 pt-1 pointer-events-none z-20">
           <div className="w-24 h-[2px] bg-white/40 rounded-full blur-[1px]" />

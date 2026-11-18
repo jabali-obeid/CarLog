@@ -128,20 +128,20 @@ export default function FluidBottomDock({
               iconTone = isActive
                 ? item.primary
                   ? 'text-white'
-                  : 'text-red-600'
-                : 'text-slate-400 group-hover:text-red-500';
+                  : 'text-racing-ink'
+                : 'text-ink-muted group-hover:text-racing-ink';
               labelTone = isActive
-                ? 'text-red-600 font-bold'
-                : 'text-slate-500 font-medium group-hover:text-red-600';
+                ? 'text-racing-ink font-bold'
+                : 'text-ink-muted font-medium group-hover:text-racing-ink';
             } else {
               iconTone = isActive
                 ? 'text-white'
-                : 'text-zinc-500 group-hover:text-zinc-300';
+                : 'text-pit-muted group-hover:text-white';
               labelTone = isActive
                 ? item.primary
                   ? 'text-red-400 font-bold'
                   : 'text-white font-bold'
-                : 'text-zinc-500 font-medium group-hover:text-zinc-300';
+                : 'text-pit-muted font-medium group-hover:text-white';
             }
 
             return (

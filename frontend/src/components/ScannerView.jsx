@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, RefreshCw, CheckCircle2, AlertTriangle, Aperture, ScanLine } from 'lucide-react';
+import { Camera, Upload, RefreshCw, CheckCircle2, AlertTriangle, Aperture, ScanLine } from './CarLogIcons';
 import confetti from 'canvas-confetti';
 import CarCard from './CarCard';
 import { sound } from '../utils/audio';
@@ -435,19 +435,19 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
       )}
 
       {/* Main Optical Viewfinder / Capture Bay */}
-      <div className="relative rounded-3xl cl-card cl-microgrid p-4 sm:p-5 overflow-hidden">
+      <div className="relative rounded-3xl cl-card p-4 sm:p-5 overflow-hidden">
         <div className="absolute -top-12 -right-12 w-44 h-44 bg-red-600/8 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+            <div className="w-9 h-9 rounded-xl bg-racing-soft border border-red-200 flex items-center justify-center text-racing-ink">
               <Aperture className="w-4.5 h-4.5" />
             </div>
             <div>
-              <span className="text-[9px] font-telemetry uppercase tracking-widest text-red-600 block leading-none font-bold">
+              <span className="text-[9px] font-telemetry uppercase tracking-widest text-racing-ink block leading-none font-bold">
                 CAPTURA EN CALLE // IA
               </span>
-              <h2 className="font-display text-2xl font-extrabold text-[#111318] uppercase tracking-tight leading-none mt-1">
+              <h2 className="font-display text-2xl font-extrabold text-ink uppercase tracking-tight leading-none mt-1">
                 Escáner de Calle
               </h2>
             </div>
@@ -457,10 +457,10 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             {dailySaveStats && (
               <span
                 className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${dailySaveStats.remaining === 0
-                  ? 'bg-red-600 border-red-600 text-white'
+                  ? 'bg-racing border-racing text-white'
                   : dailySaveStats.remaining <= 2
-                    ? 'bg-red-50 border-red-200 text-red-700'
-                    : 'cl-panel text-[#111318]'
+                    ? 'bg-racing-soft border-red-200 text-racing-ink'
+                    : 'cl-panel text-ink'
                   }`}
               >
                 Guardados: {dailySaveStats.used}/{dailySaveStats.limit}
@@ -469,14 +469,14 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             {quotaInfo ? (
               <span
                 className={`px-2.5 py-1 rounded-lg border text-[10px] font-telemetry font-semibold uppercase ${quotaInfo.remaining <= 3
-                  ? 'bg-red-50 border-red-200 text-red-700'
-                  : 'cl-panel text-[#111318]'
+                  ? 'bg-racing-soft border-red-200 text-racing-ink'
+                  : 'cl-panel text-ink'
                   }`}
               >
                 Escaneos: {String(quotaInfo.remaining).padStart(2, '0')}/{quotaInfo.limit}
               </span>
             ) : (
-              <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-slate-600 font-telemetry uppercase">
+              <span className="px-2.5 py-1 rounded-lg cl-panel text-[10px] text-ink-secondary font-telemetry uppercase">
                 15 escaneos/día
               </span>
             )}
@@ -548,7 +548,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
                   <h4 className="font-display text-2xl font-extrabold uppercase text-white tracking-wide">
                     Identificando Vehículo
                   </h4>
-                  <p className="text-[11px] font-telemetry text-zinc-400 mt-1 max-w-xs uppercase tracking-wider">
+                  <p className="text-[11px] font-telemetry text-pit-muted mt-1 max-w-xs uppercase tracking-wider">
                     Marca · Carrocería · Potencia · Rareza
                   </p>
                 </div>
@@ -556,15 +556,15 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
             </div>
           ) : (
             <div className="text-center px-5 py-6 space-y-4 max-w-md relative z-10">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-racing-soft border border-red-200 flex items-center justify-center mx-auto text-racing-ink shadow-xs">
                 <Camera className="w-6 h-6" />
               </div>
 
               <div className="space-y-1">
-                <h3 className="font-display text-2xl font-extrabold uppercase text-[#111318] tracking-tight">
+                <h3 className="font-display text-2xl font-extrabold uppercase text-ink tracking-tight">
                   Apunta al vehículo
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-ink-secondary leading-relaxed">
                   Detecta marca, modelo, especificaciones técnicas y categoría de colección al instante.
                 </p>
               </div>
@@ -639,7 +639,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
                 setIdentifiedCar(null);
                 stopCamera();
               }}
-              className="text-xs font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-red-50 active:scale-95"
+              className="text-xs font-semibold text-ink-secondary hover:text-racing-ink flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-racing-soft active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Escanear otro</span>
@@ -647,7 +647,7 @@ Si SÍ hay un auto visible, responde ÚNICAMENTE con un JSON válido con esta es
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-semibold text-slate-600 hover:text-red-600 flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-red-50 active:scale-95"
+              className="text-xs font-semibold text-ink-secondary hover:text-racing-ink flex items-center gap-1.5 transition py-1 px-2 rounded-lg hover:bg-racing-soft active:scale-95"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>Subir otra foto</span>

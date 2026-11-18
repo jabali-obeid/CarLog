@@ -13,50 +13,67 @@
 }
 
 @theme {
-  --font-display: 'Barlow Condensed', system-ui, -apple-system, sans-serif;
-  --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Golos Text', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Azeret Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* CarLog Brand & Surface Palette (WCAG AA >= 4.5:1 verified) */
+  --color-canvas: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-recessed: #eaedf2;
+  --color-ink: #0f1117;
+  --color-ink-secondary: #374151;
+  --color-ink-muted: #4b5563;
+  --color-ink-inverse: #f8fafc;
+  --color-racing: #dc2626;
+  --color-racing-ink: #b91c1c;
+  --color-racing-soft: #fde8e8;
+  --color-pit: #11151f;
+  --color-pit-surface: #1a202e;
+  --color-pit-muted: #cbd5e1;
+  --color-emerald-ink: #047857;
+  --color-amber-ink: #b45309;
 }
 
 :root {
   /* Crisp White & Motorsport Red Surface Palette */
-  --cl-canvas: #f4f5f7;
-  --cl-surface: #ffffff;
-  --cl-elevated: #ffffff;
+  --cl-canvas: var(--color-canvas);
+  --cl-surface: var(--color-surface);
+  --cl-elevated: var(--color-surface);
   --cl-elevated-2: #f8f9fb;
-  --cl-recessed: #f1f3f6;
+  --cl-recessed: var(--color-recessed);
 
   /* Hairlines & Edge Borders */
-  --cl-border-subtle: rgba(15, 23, 42, 0.06);
-  --cl-border-default: rgba(15, 23, 42, 0.09);
-  --cl-border-strong: rgba(220, 38, 38, 0.25);
+  --cl-border-subtle: rgba(15, 23, 42, 0.08);
+  --cl-border-default: rgba(15, 23, 42, 0.11);
+  --cl-border-strong: rgba(185, 28, 28, 0.3);
   --cl-inset-rim: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-  /* Text Hierarchy */
-  --cl-text-primary: #111318;
-  --cl-text-secondary: #4b5563;
-  --cl-text-muted: #6b7280;
+  /* High-Contrast Text Hierarchy (>= 4.5:1) */
+  --cl-text-primary: var(--color-ink);
+  --cl-text-secondary: var(--color-ink-secondary);
+  --cl-text-muted: var(--color-ink-muted);
 
   /* Calibrated Red Motorsport Accents */
-  --cl-accent-red: #dc2626;
+  --cl-accent-red: var(--color-racing);
   --cl-accent-red-soft: rgba(220, 38, 38, 0.1);
-  --cl-accent-cyan: #dc2626;
+  --cl-accent-cyan: var(--color-racing);
   --cl-accent-cyan-soft: rgba(220, 38, 38, 0.1);
-  --cl-accent-amber: #d97706;
-  --cl-accent-amber-soft: rgba(217, 119, 6, 0.12);
-  --cl-accent-emerald: #059669;
-  --cl-accent-emerald-soft: rgba(5, 150, 105, 0.12);
+  --cl-accent-amber: var(--color-amber-ink);
+  --cl-accent-amber-soft: rgba(180, 83, 9, 0.12);
+  --cl-accent-emerald: var(--color-emerald-ink);
+  --cl-accent-emerald-soft: rgba(4, 120, 87, 0.12);
 
   /* Shadows */
   --cl-shadow-card: 0 14px 32px -14px rgba(15, 23, 42, 0.12);
   --cl-shadow-dock: 0 -10px 26px rgba(15, 23, 42, 0.08);
 
   /* Light Gallery Showroom Tokens */
-  --cl-studio-bg: #f4f5f7;
-  --cl-studio-surface: #ffffff;
-  --cl-studio-ink: #111318;
-  --cl-studio-muted: #6b7280;
-  --cl-studio-border: rgba(15, 23, 42, 0.08);
+  --cl-studio-bg: var(--color-canvas);
+  --cl-studio-surface: var(--color-surface);
+  --cl-studio-ink: var(--color-ink);
+  --cl-studio-muted: var(--color-ink-muted);
+  --cl-studio-border: rgba(15, 23, 42, 0.1);
 }
 
 @layer base {
@@ -64,6 +81,7 @@
     background-color: var(--cl-canvas);
     color: var(--cl-text-primary);
     font-family: var(--font-sans);
+    line-height: 1.5;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -73,9 +91,19 @@
     background-color: var(--cl-canvas);
     color: var(--cl-text-primary);
     font-family: var(--font-sans);
+    line-height: 1.5;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   button, a, [role="button"] {
@@ -129,10 +157,7 @@
   }
 
   .cl-microgrid {
-    background-image:
-      linear-gradient(to right, rgba(220, 38, 38, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background-color: var(--color-surface);
   }
 
   .cl-showroom-spotlight {
